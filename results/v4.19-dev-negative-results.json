@@ -1,0 +1,48 @@
+{
+  "status": "development-only; excluded from T2 inference",
+  "attempts": [
+    {
+      "attempt": "T0-initial",
+      "preregistration_sha256": "c870ac245b5c4ed1d70c32e1ba97dd87e48106d7fbb6807ed167bca9d2bf4e19",
+      "preregistration_git_blob_sha": "d8da1bc2c2ab439e0dc65982642c5788fb7c2d02",
+      "seeds": [1000, 1001],
+      "failure_class": "benchmark-design",
+      "observations": {
+        "circular_seed_1000_gap_closed": 0.3531,
+        "circular_seed_1001_operator_accepted": false,
+        "rank_seed_1000_b0": 0.201716,
+        "rank_seed_1000_b1": 0.198785,
+        "rank_seed_1001_b0": 0.180046,
+        "rank_seed_1001_b1": 0.180356
+      },
+      "cause": "actions omitted from predictor feature environment and W-RankInteraction oracle signal too weak",
+      "resolution": "Amendment A1; retire affected development/frozen ranges"
+    },
+    {
+      "attempt": "T0-A1",
+      "failure_class": "benchmark-design",
+      "failure": "W-Circular B0 approximately equaled B1 and residual trigger stayed below 2.5 after actions were exposed",
+      "cause": "circular increment was too directly reconstructible from action",
+      "resolution": "Amendment A2; persistent stochastic drive added; all A1 frozen ranges retired unused"
+    },
+    {
+      "attempt": "T0-A2-smoke",
+      "tier": "T0",
+      "candidate_budget": 200,
+      "inferential_verdict": "NONE",
+      "rows": [
+        {"family":"circular","seed":1400,"b0":0.148298,"b1":0.043940,"trigger":16.87,"accepted":false},
+        {"family":"circular","seed":1401,"b0":0.161893,"b1":0.075905,"trigger":17.63,"accepted":false},
+        {"family":"rank_interaction","seed":1400,"b0":0.104551,"b1":0.060525,"trigger":7.23,"accepted":false},
+        {"family":"rank_interaction","seed":1401,"b0":0.105610,"b1":0.050732,"trigger":5.60,"accepted":false}
+      ],
+      "interpretation": "mechanically valid smoke path; T0 has no scientific gate"
+    },
+    {
+      "attempt": "pre-T1-contract-review",
+      "failure_class": "implementation-contract",
+      "failure": "first B0 implementation used a generic linear surrogate rather than v4.18.5 restricted to L0",
+      "resolution": "added v419_v418_adapter importing unchanged v418 G/Model/rg/mut/cross; no frozen seeds consumed"
+    }
+  ]
+}
