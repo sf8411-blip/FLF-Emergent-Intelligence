@@ -1,0 +1,23 @@
+{
+  "preregistration_sha256": "ed22321d6af2664201146a017a35cb7ff035229b48032eae25e98d175a5530f5",
+  "preregistration_git_blob_sha": "7257507566b7c15261fdf8a1aba705ec7cde7e63",
+  "code_commit_sha": "9a0276ce75adec05439c3efae20c08a362d1c461",
+  "diagnostic_count": 12,
+  "families": [
+    {
+      "family": "circular",
+      "diagnostic_seeds": [8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011],
+      "max_depth_exhaustive": 3,
+      "max_nodes": 11,
+      "unique_functions_by_depth": [1,22,1070,1199237],
+      "generated_candidates": 1199236,
+      "depth_le3_equivalent_found": null,
+      "reference_depth": 4,
+      "reference_nodes": 11,
+      "reference_nrmse": 4.453560714911757e-16,
+      "l0_nrmse": 0.9867332146833443,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
