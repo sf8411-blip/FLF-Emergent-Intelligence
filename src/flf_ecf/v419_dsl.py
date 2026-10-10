@@ -92,24 +92,44 @@ UNARY = (
 BINARY=('product','interaction','add','subtract')
 
 
+def expr_type(expr: Expr) -> str:
+    if expr.op == 'var': return 'scalar'
+    if expr.op in ('threshold_gt','threshold_lt'): return 'bool'
+    return 'scalar'
+
+def valid_unary(op: str, arg: Expr) -> bool:
+    t=expr_type(arg)
+    if op in ('threshold_gt','threshold_lt','modulo'): return t=='scalar'
+    return t in ('scalar','bool')
+
+def valid_binary(op: str, a: Expr, b: Expr) -> bool:
+    ta,tb=expr_type(a),expr_type(b)
+    if op=='interaction': return ta in ('scalar','bool') and tb=='bool'
+    return ta in ('scalar','bool') and tb in ('scalar','bool')
+
+
 def mutate_expr(pool: list[Expr], variables: tuple[str,...], rng: np.random.Generator, max_depth:int=6, max_nodes:int=11) -> Expr:
-    """Generate one typed-enough numeric expression. Search has no benchmark-specific macro."""
+    """Generate one type-valid expression. Search has no benchmark-specific macro."""
     for _ in range(100):
         mode=int(rng.integers(3))
         if mode==0 or not pool:
             e=var(variables[int(rng.integers(len(variables)))])
             steps=int(rng.integers(1,max_depth+1))
             for _ in range(steps):
-                op, params = UNARY[int(rng.integers(len(UNARY)))]
+                choices=[item for item in UNARY if valid_unary(item[0],e)]
+                if not choices: break
+                op, params = choices[int(rng.integers(len(choices)))]
                 p=params[int(rng.integers(len(params)))]
                 e=Expr(op,(e,),p)
                 if e.depth()>=max_depth: break
         elif mode==1:
-            a=pool[int(rng.integers(len(pool)))]; op,params=UNARY[int(rng.integers(len(UNARY)))]
-            p=params[int(rng.integers(len(params)))]; e=Expr(op,(a,),p)
+            a=pool[int(rng.integers(len(pool)))]; choices=[item for item in UNARY if valid_unary(item[0],a)]
+            if not choices: continue
+            op,params=choices[int(rng.integers(len(choices)))]; p=params[int(rng.integers(len(params)))]; e=Expr(op,(a,),p)
         else:
-            a=pool[int(rng.integers(len(pool)))]; b=pool[int(rng.integers(len(pool)))]; op=BINARY[int(rng.integers(len(BINARY)))]
-            e=Expr(op,(a,b),None)
+            a=pool[int(rng.integers(len(pool)))]; b=pool[int(rng.integers(len(pool)))]; choices=[op for op in BINARY if valid_binary(op,a,b)]
+            if not choices: continue
+            op=choices[int(rng.integers(len(choices)))]; e=Expr(op,(a,b),None)
         if e.depth()<=max_depth and e.nodes()<=max_nodes:
             return e
     return var(variables[0])
@@ -126,6 +146,7 @@ def l0_expressions(variables: Iterable[str]) -> list[Expr]:
         x=var(name); out += [x, Expr('lag',(x,),1), Expr('diff',(x,),1)]
         out += [Expr('filter_mean',(x,),w) for w in (2,3,5)]
     names=list(variables)
+    # Pairwise products of raw variables only; keeps L0 deliberately incomplete.
     for i,a in enumerate(names):
         for b in names[i+1:]: out.append(Expr('product',(var(a),var(b))))
     return out
