@@ -9,8 +9,7 @@ from flf_ecf.v419_worlds import make_world,hidden_feature,reference_expr
 
 PREREG=hashlib.sha256((ROOT/'docs/v4.19_preregistration.md').read_bytes()).hexdigest()
 PREREG_BLOB=os.environ.get('V419_PREREG_BLOB_SHA','UNKNOWN')
-DIAG_SEEDS=tuple(range(8000,8012))
-SEG=20
+DIAG_SEEDS=tuple(range(8000,8012));SEG=20;MAX_NODES=11
 
 @dataclass
 class Cand:
@@ -23,15 +22,15 @@ def _hash(a):
     x=np.nan_to_num(a,nan=0.0,posinf=1e8,neginf=-1e8)
     return hashlib.blake2b(np.round(x,8).tobytes(),digest_size=16).digest()
 
-def _segments(a): return [a[i*SEG:(i+1)*SEG] for i in range(len(DIAG_SEEDS))]
+def _segments(a):return [a[i*SEG:(i+1)*SEG] for i in range(len(DIAG_SEEDS))]
 
 def _unary(op,p,a):
     outs=[]
     for x in _segments(a):
         if op=='lag':
-            k=int(p); y=np.empty_like(x);y[:k]=x[0];y[k:]=x[:-k]
+            k=int(p);y=np.empty_like(x);y[:k]=x[0];y[k:]=x[:-k]
         elif op=='diff':
-            k=int(p); lag=np.empty_like(x);lag[:k]=x[0];lag[k:]=x[:-k];y=x-lag
+            k=int(p);lag=np.empty_like(x);lag[:k]=x[0];lag[k:]=x[:-k];y=x-lag
         elif op=='cumsum':y=np.cumsum(x)
         elif op=='filter_mean':
             w=int(p);y=np.empty_like(x);cs=np.cumsum(np.r_[0.0,x])
@@ -84,12 +83,14 @@ def audit_family(family, checkpoint):
             for op,pars in UNARY:
                 if not valid_unary(op,a.expr):continue
                 for p in pars:
+                    e=Expr(op,(a.expr,),p)
+                    if e.nodes()>MAX_NODES:continue
                     try:o=_unary(op,p,a.out)
                     except Exception:continue
                     if not np.all(np.isfinite(o)) or np.max(np.abs(o))>1e10:continue
                     k=_hash(o)
                     if k in allmap or k in new:continue
-                    e=Expr(op,(a.expr,),p);new[k]=Cand(e,o,depth);generated+=1
+                    new[k]=Cand(e,o,depth);generated+=1
                     if _nrmse_affine(o,target)<=1e-8:found=e;break
                 if found:break
             if found:break
@@ -103,24 +104,26 @@ def audit_family(family, checkpoint):
                     for left,right in variants:
                         if not valid_binary(op,left.expr,right.expr):continue
                         if op in ('product','add') and left.expr.text()>right.expr.text():continue
+                        e=Expr(op,(left.expr,right.expr))
+                        if e.nodes()>MAX_NODES:continue
                         try:o=_binary(op,left.out,right.out)
                         except Exception:continue
                         if not np.all(np.isfinite(o)) or np.max(np.abs(o))>1e10:continue
                         k=_hash(o)
                         if k in allmap or k in new:continue
-                        e=Expr(op,(left.expr,right.expr));new[k]=Cand(e,o,depth);generated+=1
+                        new[k]=Cand(e,o,depth);generated+=1
                         if _nrmse_affine(o,target)<=1e-8:found=e;break
                     if found:break
                 if found:break
         allmap.update(new);frontier=list(new.values());counts.append(len(allmap))
         checkpoint.parent.mkdir(parents=True,exist_ok=True);tmp=checkpoint.with_suffix('.tmp')
         tmp.write_text(json.dumps({'family':family,'depth_completed':depth,'unique_functions':counts,'generated':generated,'found_equivalent':found.text() if found else None,'preregistration_sha256':PREREG},indent=2));os.replace(tmp,checkpoint)
-    return {'family':family,'diagnostic_seeds':list(DIAG_SEEDS),'max_depth_exhaustive':3,'unique_functions_by_depth':counts,'generated_candidates':generated,
-            'depth_le3_equivalent_found':found.text() if found else None,'reference_depth':ref.depth(),'reference_nrmse':referr,'l0_nrmse':l0err,
-            'pass':found is None and len(counts)==4 and ref.depth()>=4 and referr<=.02 and l0err>=.20}
+    return {'family':family,'diagnostic_seeds':list(DIAG_SEEDS),'max_depth_exhaustive':3,'max_nodes':MAX_NODES,'unique_functions_by_depth':counts,'generated_candidates':generated,
+            'depth_le3_equivalent_found':found.text() if found else None,'reference_depth':ref.depth(),'reference_nodes':ref.nodes(),'reference_nrmse':referr,'l0_nrmse':l0err,
+            'pass':found is None and len(counts)==4 and ref.depth()>=4 and ref.nodes()<=MAX_NODES and referr<=.02 and l0err>=.20}
 
 p=argparse.ArgumentParser();p.add_argument('--family',choices=['circular','rank_interaction','all'],default='all');p.add_argument('--out',default='results/v4.19-reachability.json');p.add_argument('--checkpoint-dir',default='results/reachability-checkpoints');p.add_argument('--code-sha',default=os.environ.get('GITHUB_SHA','UNKNOWN'));a=p.parse_args()
 fams=['circular','rank_interaction'] if a.family=='all' else [a.family];results=[]
 for fam in fams:results.append(audit_family(fam,ROOT/a.checkpoint_dir/f'{fam}.json'))
-report={'preregistration_sha256':PREREG,'preregistration_git_blob_sha':PREREG_BLOB,'code_commit_sha':a.code_sha,'diagnostic_count':12,'families':results,'pass':len(results)==2 and all(x['pass'] for x in results)}
+report={'preregistration_sha256':PREREG,'preregistration_git_blob_sha':PREREG_BLOB,'code_commit_sha':a.code_sha,'diagnostic_count':12,'families':results,'pass':all(x['pass'] for x in results) and len(results)==len(fams)}
 out=ROOT/a.out;out.parent.mkdir(parents=True,exist_ok=True);tmp=out.with_suffix('.tmp');tmp.write_text(json.dumps(report,indent=2));os.replace(tmp,out);print(json.dumps(report,indent=2))
