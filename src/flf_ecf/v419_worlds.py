@@ -18,6 +18,7 @@ def _rank(x,w):
     return out
 
 def hidden_feature(family:str, env:dict[str,np.ndarray]) -> np.ndarray:
+    # Oracle only; not imported by learner/synthesis.
     if family=='circular':
         x=env['x0'];d=x-np.r_[x[0],x[:-1]]
         return d + (d < -0.5).astype(float) - (d > 0.5).astype(float)
@@ -26,10 +27,12 @@ def hidden_feature(family:str, env:dict[str,np.ndarray]) -> np.ndarray:
         m=_causal_mean(lag,3); dm=m-np.r_[m[0],m[:-1]]
         gate=(_rank(x0,9)>.75).astype(float)
         return dm*gate
-    if family=='null': return env['x0']
+    if family=='null':
+        return env['x0']
     raise ValueError(family)
 
 def reference_expr(family:str) -> Expr:
+    # Used only by reachability/oracle audit, never candidate search.
     if family=='circular':
         x=var('x0'); d=Expr('diff',(x,),1)
         pos=Expr('threshold_gt',(d,),.5)
@@ -47,14 +50,16 @@ def make_world(family:str,seed:int,n:int=700,variant:int=0):
     if family=='noise':
         env={f'x{i}':r.normal(size=n) for i in range(3)}; y=r.normal(scale=.8,size=n);return env,u,y
     if family in ('circular','actuator_shuffle'):
-        step=.035+.018*np.tanh(u[:,0])+.01*r.normal(size=n)
+        drive=np.zeros(n)
+        for i in range(1,n): drive[i]=.85*drive[i-1]+.22*r.normal()+.10*np.tanh(u[i,0])
+        step=.22*np.tanh(drive)
         phase=np.cumsum(step); x0=np.mod(phase,1.0)
         env={'x0':x0,'x1':r.normal(size=n),'x2':.6*np.sin(.07*t)+.25*r.normal(size=n)}
         h=hidden_feature('circular',env)
         action=u[:,0].copy()
         if family=='actuator_shuffle': action=r.permutation(action)
-        y=1.5*h+.22*action+.08*r.normal(size=n)
-        if variant:y += .12*np.sin(.013*t)
+        y=1.8*h+.08*action+.04*r.normal(size=n)
+        if variant:y += .08*np.sin(.013*t)
         return env,u,y
     if family=='rank_interaction':
         raw=np.zeros(n)
@@ -62,7 +67,7 @@ def make_world(family:str,seed:int,n:int=700,variant:int=0):
         x0=np.tanh(raw) if variant==0 else np.sign(raw)*np.abs(raw)**.55
         x1=np.cumsum(.08*r.normal(size=n)+.025*u[:,1])
         env={'x0':x0,'x1':x1,'x2':r.normal(size=n)}
-        h=hidden_feature(family,env);y=1.6*h+.18*u[:,1]+.06*r.normal(size=n)
+        h=hidden_feature(family,env);y=4.0*h+.18*u[:,1]+.04*r.normal(size=n)
         return env,u,y
     if family=='null':
         x0=np.zeros(n)
