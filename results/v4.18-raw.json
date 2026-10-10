@@ -1,0 +1,27 @@
+[
+  {
+    "seed": 0,
+    "genome": {"q": 0,"w": 3,"f": 0,"ks": 6,"ka": 8,"norm": 0,"target": 0,"policy": 0,"actmode": 1,"mdl": 0},
+    "evals": 30,"evolution_score": -0.07690768169097272,"initial_best_score": -1.2650529344139096,"heldout_rmse": 0.7113824274419783,"heldout_control": 1.0,"fixed_rmse": 2.0148667210945272,"fixed_control": 0.30416666666666675,"random_rmse": 0.8834543244755455,"random_control": 0.9291666666666667,"no_mutation_score": -1.0044198992232418,"no_crossover_score": -1.7815699869162642,"shuffled_rmse": 2.5059606607610494,"noise_rmse": 1.546096244299663
+  },
+  {
+    "seed": 1,
+    "genome": {"q": 0,"w": 3,"f": 0,"ks": 5,"ka": 8,"norm": 0,"target": 0,"policy": 0,"actmode": 1,"mdl": 2},
+    "evals": 30,"evolution_score": -0.5801257426227994,"initial_best_score": -0.6203588686596211,"heldout_rmse": 0.9197594641559579,"heldout_control": 0.9916666666666667,"fixed_rmse": 2.0148667210945272,"fixed_control": 0.30416666666666675,"random_rmse": 0.7021603115808833,"random_control": 1.0,"no_mutation_score": -0.6003666413657174,"no_crossover_score": -0.8850273237300265,"shuffled_rmse": 2.5877794002987953,"noise_rmse": 1.51877632906064
+  },
+  {
+    "seed": 2,
+    "genome": {"q": 0,"w": 1,"f": 0,"ks": 6,"ka": 7,"norm": 1,"target": 1,"policy": 0,"actmode": 1,"mdl": 0},
+    "evals": 30,"evolution_score": -0.07311552639306933,"initial_best_score": -0.10810857211178264,"heldout_rmse": 0.6437832999152078,"heldout_control": 1.0,"fixed_rmse": 2.0148667210945272,"fixed_control": 0.30416666666666675,"random_rmse": 1.3100919663230979,"random_control": 0.05416666666666655,"no_mutation_score": -0.30610002775138256,"no_crossover_score": -0.10313351251970526,"shuffled_rmse": 2.6220357777320764,"noise_rmse": 1.8787400516349573
+  },
+  {
+    "seed": 3,
+    "genome": {"q": 0,"w": 1,"f": 0,"ks": 6,"ka": 7,"norm": 0,"target": 1,"policy": 1,"actmode": 1,"mdl": 0},
+    "evals": 30,"evolution_score": -0.08835962072341338,"initial_best_score": -0.10282377109749688,"heldout_rmse": 0.6501208518035025,"heldout_control": 1.0,"fixed_rmse": 2.0148667210945272,"fixed_control": 0.30416666666666675,"random_rmse": 1.711750881340376,"random_control": 0.5125000000000002,"shuffled_rmse": 2.475618925833367,"noise_rmse": 1.7170371175081696
+  },
+  {
+    "seed": 4,
+    "genome": {"q": 0,"w": 1,"f": 3,"ks": 7,"ka": 7,"norm": 0,"target": 0,"policy": 0,"actmode": 1,"mdl": 0},
+    "evals": 30,"evolution_score": -0.10627157854498734,"initial_best_score": -0.36877700176633305,"heldout_rmse": 0.6976939598231271,"heldout_control": 1.0,"fixed_rmse": 2.0148667210945272,"fixed_control": 0.30416666666666675,"random_rmse": 1.1787738428135266,"random_control": 0.9958333333333333,"shuffled_rmse": 2.711687078606767,"noise_rmse": 1.44426682095364
+  }
+]
