@@ -1,0 +1,18 @@
+{
+  "seeds": 20,
+  "mean_selected_order": 2,
+  "mean_states": 5,
+  "prediction_nll": 2.210109627167669,
+  "baseline_nll": 2.371714249101681,
+  "shuffled_nll": 2.6200856723687203,
+  "control_reward": 0.6727166666666666,
+  "baseline_reward": 0.6523666666666667,
+  "action_ablated_reward": 0.39735,
+  "rediscovery_similarity": 0.8313838188548401,
+  "renaming_invariance_rate": 1,
+  "prediction_gain": 0.06813831893754566,
+  "shuffle_gap": 0.18550032096210972,
+  "control_gain": 0.02034999999999998,
+  "action_value_gap": 0.27536666666666665,
+  "gate_pass": true
+}
