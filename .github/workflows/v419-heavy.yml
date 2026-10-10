@@ -1,0 +1,145 @@
+name: v419-heavy-preT2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v4.19-wip]
+    paths:
+      - .github/workflows/v419-heavy.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v419-heavy-preT2-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  V419_PREREG_BLOB_SHA: 7257507566b7c15261fdf8a1aba705ec7cde7e63
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Full regression suite including unchanged v4.18 tests
+        run: python -m unittest discover -s tests -v
+
+  reachability:
+    needs: regression
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [circular, rank_interaction]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Exhaustive G10 audit through typed depth 3
+        run: |
+          python run_v419_reachability.py \
+            --family "${{ matrix.family }}" \
+            --out "results/v4.19-reachability-${{ matrix.family }}.json" \
+            --checkpoint-dir "results/reachability-checkpoints-${{ matrix.family }}" \
+            --code-sha "$GITHUB_SHA"
+          python - <<'PY'
+          import json,sys
+          p='results/v4.19-reachability-${{ matrix.family }}.json'
+          d=json.load(open(p))
+          if not d.get('pass'):
+              print(json.dumps(d,indent=2))
+              sys.exit(2)
+          PY
+      - name: Upload reachability result/checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v419-reach-${{ matrix.family }}
+          path: |
+            results/v4.19-reachability-${{ matrix.family }}.json
+            results/reachability-checkpoints-${{ matrix.family }}/*.json
+          if-no-files-found: warn
+
+  reachability_merge:
+    needs: reachability
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: v419-reach-*
+          path: reach-parts
+          merge-multiple: true
+      - name: Merge and enforce G10
+        run: |
+          python merge_v419_reachability.py reach-parts/v4.19-reachability-*.json --out results/v4.19-reachability.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v419-reachability-merged
+          path: results/v4.19-reachability.json
+
+  pilot:
+    needs: [regression, reachability_merge]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: v419-reachability-merged
+          path: results
+      - name: T1 development pilot — exact preregistered candidate budget
+        run: |
+          python run_v419.py \
+            --tier T1 \
+            --shard "${{ matrix.shard }}/4" \
+            --out "results/v4.19-t1-shard-${{ matrix.shard }}.jsonl" \
+            --code-sha "$GITHUB_SHA"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v419-t1-${{ matrix.shard }}
+          path: results/v4.19-t1-shard-${{ matrix.shard }}.jsonl
+          if-no-files-found: warn
+
+  pilot_merge:
+    needs: pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: v419-t1-*
+          path: pilot-parts
+          merge-multiple: true
+      - name: Merge T1 without inferential verdict
+        run: python merge_v419_pilot.py pilot-parts/*.jsonl --out results/v4.19-t1-summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v419-t1-summary
+          path: results/v4.19-t1-summary.json
