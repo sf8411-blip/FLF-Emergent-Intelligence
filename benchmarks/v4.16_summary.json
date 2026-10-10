@@ -1,0 +1,17 @@
+{
+  "pred_abs": 0.9391812865497076,
+  "pred_raw": 0.19081035923141185,
+  "pred_no_action": 0.3206349206349206,
+  "pred_shuffle": 0.3418546365914787,
+  "control_abs": 0.9697222222222223,
+  "control_raw": 0.8063888888888889,
+  "stability": 0.930718954248366,
+  "clusters": 15.533333333333333,
+  "tokens": 34,
+  "seeds": 30,
+  "prediction_gain_over_raw": 0.7483709273182957,
+  "action_ablation_gap": 0.618546365914787,
+  "shuffle_gap": 0.5973266499582288,
+  "control_gain_over_raw": 0.16333333333333333,
+  "gate_pass": true
+}
