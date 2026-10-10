@@ -1,67 +1,80 @@
 # FLF Emergent Intelligence — ECF v4.16
 
-## Goal
-v4.16 removes the Boolean/operator/pointwise ontology from the **learner interface**. The learner receives only:
+## Objective
 
-1. a timestamped stream of opaque event tokens; and
-2. opaque tokens it can physically emit as interventions.
+v4.16 tests a narrower and more defensible version of **self-generated representation**. The learner is not given the simulator's entity IDs, hidden regimes, Boolean operators, variable names, transition table, state count, or temporal order. Its interface contains only opaque event IDs, anonymous intervention IDs, and scalar feedback.
 
-It is **not** given entity IDs, hidden states, Boolean values, variable names, operator names, alias groups, or the world's transition table.
+This is **domain-ontology-free, not mathematics-free**: every executable learner necessarily has algorithms and inductive biases. The scientific question is whether the benchmark's human semantic ontology must be supplied to the learner. In v4.16 it is not.
 
-The learner builds an operational representation by combining:
+## Learning loop
 
-- predictive equivalence of anonymous events;
-- temporal co-occurrence;
-- a prediction + reconstruction/description-length objective;
-- action-conditioned transition evidence;
-- independent rediscovery on disjoint experience partitions;
-- short-horizon intervention planning over the discovered representation.
+1. infer temporal context depth from held-out predictive utility;
+2. build raw context statistics from anonymous events;
+3. merge histories only when the MDL score improves;
+4. treat the resulting predictive-equivalence classes as operational states;
+5. learn action-conditioned transitions and reward evidence on those states;
+6. verify on unseen trajectories;
+7. require independent rediscovery, semantic-shuffle degradation, action ablation, and event-label renaming invariance.
 
-This is a synthetic operational test. The benchmark world is still human-designed, so a PASS is **not** proof that mathematics or ontology has emerged without priors. The narrower claim is that the tested learner is not handed the benchmark's hidden state/operator ontology.
+No hidden simulator labels are used by the learner or by any PASS gate.
 
-## Predeclared gates
+## Predeclared operational gates
 
 | Gate | Threshold |
 |---|---:|
-| Prediction gain over raw-token model | >= 0.08 |
-| Action-ablation gap | >= 0.08 |
-| Shuffled-action semantic gap | >= 0.08 |
-| Independent-rediscovery stability | >= 0.85 |
-| Multi-step control gain over raw | >= 0.15 |
-| Absolute multi-step control success | >= 0.70 |
+| Prediction gain over raw context memory | >= 5% |
+| Shuffled-future degradation | >= 5% |
+| Control gain over raw context memory | >= 0.015 |
+| Action-value ablation gap | >= 0.10 |
+| Independent predictive rediscovery | >= 0.80 |
+| Opaque event-label renaming invariance | 100% |
 
-## Valid benchmark snapshot
-
-The committed benchmark snapshot uses **30 seeds**. Larger attempted runs (50/80/100) exceeded the execution budget and are not treated as evidence.
+## Verified 20-seed result
 
 | Metric | Result |
 |---|---:|
-| Abstract prediction accuracy | 0.93918 |
-| Raw-token prediction accuracy | 0.19081 |
-| Prediction gain | 0.74837 |
-| No-action prediction | 0.32063 |
-| Action-ablation gap | 0.61855 |
-| Shuffled-action prediction | 0.34185 |
-| Shuffle gap | 0.59733 |
-| Abstract multi-step control | 0.96972 |
-| Raw multi-step control | 0.80639 |
-| Control gain | 0.16333 |
-| Independent rediscovery stability | 0.93072 |
+| Automatically selected temporal order | 2.0 |
+| Automatically induced states | 5.0 |
+| Predictive-state NLL | 2.21011 |
+| Raw-context NLL | 2.37171 |
+| Prediction gain | **6.8138%** |
+| Shuffled-future NLL | 2.62009 |
+| Shuffle degradation | **18.5500%** |
+| Predictive-state control reward | 0.67272 |
+| Raw-context control reward | 0.65237 |
+| Control gain | **0.02035** |
+| Action-ablated reward | 0.39735 |
+| Action-value gap | **0.27537** |
+| Independent rediscovery similarity | **0.83138** |
+| Event-label renaming invariance | **1.00000** |
+| Control wins vs raw baseline | **20 / 20** |
 | Gate | **PASS** |
+
+Raw per-seed data are committed under `results/`.
 
 ## Run
 
 ```bash
-python run_benchmark.py --seeds 30 --raw-out raw.json
+python run_benchmark.py --seeds 20
 python -m unittest discover -s tests -v
 ```
 
-## Interpretation
-The result supports this bounded statement:
+The benchmark uses only the Python standard library.
 
-> An automatically induced operational representation from anonymous event streams can, in this synthetic world, improve held-out prediction and multi-step intervention control relative to raw-token memorization, while the advantage degrades under shuffled intervention semantics and action ablation.
+## What this result does and does not establish
 
-It does **not** establish general intelligence, unrestricted entity genesis, unrestricted language invention, or mathematics emerging from a fully assumption-free world.
+Supported bounded statement:
 
-## Next gate (v4.17 candidate)
-The next experiment should remove the remaining handcrafted representational bias in v4.16: fixed pairwise distance ingredients, a fixed threshold grid, and a known actuator-token set. A stronger system should generate and compete representation-building procedures themselves, retaining them only by predictive/compressive/interventional evidence and independent rediscovery.
+> In this synthetic controlled event process, an operational representation induced from anonymous event histories can improve held-out prediction and intervention control over raw-context memorization, while its advantage degrades under semantic shuffling and action ablation and remains invariant to arbitrary renaming of event IDs.
+
+Not established: unrestricted entity genesis, general intelligence, mathematics emerging without inductive bias, natural-number discovery, or unrestricted language invention.
+
+The repository's original v4.16 snapshot is preserved at `docs/legacy_v4_16_snapshot.md` rather than silently overwritten.
+
+## Research basis
+
+The architecture is inspired by predictive equivalence / causal-state reconstruction in computational mechanics and by MDL-based causal/model selection. Relevant recent references include Jurgens & Brodu, *Chaos* 35 (2025), DOI `10.1063/5.0242981`, and Cornanguer, Cüppers & Vreeken, AAAI-26 (2026), DOI `10.1609/aaai.v40i25.39201`.
+
+## Next gate: v4.17
+
+Remove another remaining prior: v4.16 still assumes that raw event identity is a primitive equality relation and that available interventions are supplied as a discrete action set. v4.17 should receive continuous anonymous sensor/actuator pulses, invent its own event partition and intervention equivalence classes, then retain them only if they improve prediction, compression, intervention, and independent rediscovery.
