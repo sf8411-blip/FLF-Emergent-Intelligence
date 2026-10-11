@@ -1,0 +1,49 @@
+name: v419-archive-final
+
+on:
+  push:
+    branches: [v4.19-wip]
+    paths:
+      - .github/workflows/v419-archive-final.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v4.19-wip
+          fetch-depth: 0
+      - name: Download immutable final T2 artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/v419-final
+          mkdir -p /tmp/v419-final
+          gh run download 38119331638 --repo "$GITHUB_REPOSITORY" -n v419-t2-final -D /tmp/v419-final
+      - name: Verify and archive exact result bytes
+        run: |
+          test -f /tmp/v419-final/results/v4.19-t2-raw.jsonl
+          test -f /tmp/v419-final/results/v4.19-summary.json
+          test -f /tmp/v419-final/results/v4.19-SHA256SUMS.txt
+          echo '401d88a09203bbe5cf08a86a892d867582da7aef55b0bef94fe67d50c1304ee9  /tmp/v419-final/results/v4.19-t2-raw.jsonl' | sha256sum -c -
+          echo '7f1bda715213b7545c32fb7c2e18ac04591ac5bff07c8d04099766ac7e89415b  /tmp/v419-final/results/v4.19-summary.json' | sha256sum -c -
+          mkdir -p results
+          cp /tmp/v419-final/results/v4.19-t2-raw.jsonl results/v4.19-t2-raw.jsonl
+          cp /tmp/v419-final/results/v4.19-summary.json results/v4.19-summary.json
+          cp /tmp/v419-final/results/v4.19-SHA256SUMS.txt results/v4.19-SHA256SUMS.txt
+      - name: Commit archival outputs only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v4.19-t2-raw.jsonl results/v4.19-summary.json results/v4.19-SHA256SUMS.txt
+          if git diff --cached --quiet; then
+            echo 'Final T2 artifacts already archived.'
+            exit 0
+          fi
+          git commit -m 'Archive immutable v4.19 frozen T2 results'
+          git push origin HEAD:v4.19-wip
