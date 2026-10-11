@@ -1,0 +1,165 @@
+name: v419-a3-T2-frozen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v4.19-wip]
+    paths:
+      - .github/workflows/v419-a3-t2-frozen.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v419-a3-T2-frozen-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  V419_PREREG_BLOB_SHA: 10d8be3aa63b59f5cf0e538116664e4336d6f320
+  V419_PREREG_SHA256: c85ad79c34a46e8f698a5e6ca9b1cb0b027501c2b3f782be5d35c6d46899492b
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Full regression before frozen evaluation
+        run: python -m unittest discover -s tests -v
+      - name: Verify A3 preregistration and committed G10
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib,os,sys
+          root=pathlib.Path('.')
+          h=hashlib.sha256((root/'docs/v4.19_preregistration.md').read_bytes()).hexdigest()
+          if h != os.environ['V419_PREREG_SHA256']: sys.exit('A3 preregistration SHA-256 mismatch')
+          d=json.loads((root/'results/v4.19-reachability.json').read_text())
+          if not d.get('pass') or d.get('preregistration_sha256') != h: sys.exit('fresh A3 G10 missing/stale')
+          if d.get('preregistration_git_blob_sha') != os.environ['V419_PREREG_BLOB_SHA']: sys.exit('A3 G10 blob mismatch')
+          PY
+
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      indices: ${{ steps.matrix.outputs.indices }}
+    steps:
+      - id: matrix
+        shell: bash
+        run: |
+          echo 'indices=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119]' >> "$GITHUB_OUTPUT"
+
+  t2:
+    needs: [regression, plan]
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        index: ${{ fromJSON(needs.plan.outputs.indices) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Frozen one-seed evaluation — exact preregistered T2 budget
+        run: |
+          python run_v419.py \
+            --tier T2 \
+            --shard "${{ matrix.index }}/120" \
+            --out "results/v4.19-t2-${{ matrix.index }}.jsonl" \
+            --code-sha "$GITHUB_SHA"
+      - name: Audit immutable frozen seed record
+        env:
+          IDX: ${{ matrix.index }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,sys
+          idx=int(os.environ['IDX'])
+          p=pathlib.Path(f'results/v4.19-t2-{idx}.jsonl')
+          rows=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+          if len(rows)!=1:sys.exit(f'expected exactly one frozen row, got {len(rows)}')
+          r=rows[0]
+          tasks=[('circular',s) for s in range(81000,81024)] + [('rank_interaction',s) for s in range(82000,82024)] + [('null',s) for s in range(83000,83024)] + [('actuator_shuffle',s) for s in range(91000,91024)] + [('noise',s) for s in range(91100,91124)]
+          ef,es=tasks[idx]
+          if (r.get('family'),r.get('seed')) != (ef,es):sys.exit('frozen seed mapping mismatch')
+          if r.get('tier')!='T2' or r.get('frozen_test') is not True:sys.exit('not a frozen T2 row')
+          if r.get('preregistration_sha256')!=os.environ['V419_PREREG_SHA256']:sys.exit('prereg SHA mismatch')
+          if r.get('preregistration_git_blob_sha')!=os.environ['V419_PREREG_BLOB_SHA']:sys.exit('prereg blob mismatch')
+          if not (91200 <= int(r.get('search_seed')) <= 91999):sys.exit('search seed outside A3 auxiliary range')
+          if not (91200 <= int(r.get('control_seed')) <= 91999):sys.exit('control seed outside A3 auxiliary range')
+          if r.get('downstream_model_evaluations_per_arm') != 48:sys.exit('downstream budget mismatch')
+          ce=int(r.get('candidate_evaluations',-1))
+          if ce not in (0,20000):sys.exit(f'residual/control candidate budget mismatch: {ce}')
+          if ef in ('circular','rank_interaction'):
+              if int(r.get('random_candidate_evaluations',-1)) != 20000:sys.exit('B2 budget mismatch')
+          else:
+              if int(r.get('random_candidate_evaluations',-1)) != 0:sys.exit('unexpected B2 control budget')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v419-t2-${{ matrix.index }}
+          path: results/v4.19-t2-${{ matrix.index }}.jsonl
+          if-no-files-found: warn
+
+  merge:
+    needs: t2
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: v419-t2-*
+          path: t2-parts
+          merge-multiple: true
+      - name: Merge exactly 120 immutable frozen rows
+        run: |
+          mkdir -p results
+          find t2-parts -type f -name '*.jsonl' -print0 | sort -z | xargs -0 cat > results/v4.19-t2-raw.jsonl
+          python - <<'PY'
+          import json,pathlib,sys
+          p=pathlib.Path('results/v4.19-t2-raw.jsonl')
+          rows=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+          keys={(r['family'],r['seed']) for r in rows}
+          exp={(f,s) for f,seeds in {
+            'circular':range(81000,81024),'rank_interaction':range(82000,82024),'null':range(83000,83024),
+            'actuator_shuffle':range(91000,91024),'noise':range(91100,91124)}.items() for s in seeds}
+          if len(rows)!=120 or len(keys)!=120 or keys!=exp:
+              sys.exit(f'frozen merge mismatch rows={len(rows)} unique={len(keys)} expected={len(exp)}')
+          PY
+          python merge_v419.py results/v4.19-t2-raw.jsonl --out results/v4.19-summary.json
+          sha256sum results/v4.19-t2-raw.jsonl results/v4.19-summary.json results/v4.19-reachability.json docs/v4.19_preregistration.md > results/v4.19-SHA256SUMS.txt
+          cat results/v4.19-summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v419-t2-final
+          path: |
+            results/v4.19-t2-raw.jsonl
+            results/v4.19-summary.json
+            results/v4.19-reachability.json
+            results/v4.19-SHA256SUMS.txt
+            docs/v4.19_preregistration.md
+
+  post_regression:
+    needs: merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Full regression after frozen gate evaluation
+        run: python -m unittest discover -s tests -v
