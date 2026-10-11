@@ -9,7 +9,7 @@ from flf_ecf.v419_worlds import make_world,hidden_feature,reference_expr
 
 PREREG=hashlib.sha256((ROOT/'docs/v4.19_preregistration.md').read_bytes()).hexdigest()
 PREREG_BLOB=os.environ.get('V419_PREREG_BLOB_SHA','UNKNOWN')
-DIAG_SEEDS=tuple(range(8000,8012));SEG=20;MAX_NODES=11;SCREEN_R2=1.0-1e-12
+DIAG_SEEDS=tuple(range(12000,12012));SEG=20;MAX_NODES=11;SCREEN_R2=1.0-1e-12
 
 @dataclass
 class Cand:
@@ -19,11 +19,9 @@ class Cand:
     nodes: int
     typ: str
 
-
 def _hash(a):
     x=np.nan_to_num(a,nan=0.0,posinf=1e8,neginf=-1e8)
     return hashlib.blake2b(np.round(x,8).tobytes(),digest_size=16).digest()
-
 def _key(a,typ):return (_hash(a),typ)
 def _segments(a):return [a[i*SEG:(i+1)*SEG] for i in range(len(DIAG_SEEDS))]
 
@@ -62,7 +60,6 @@ def _binary(op,a,b):
 def _nrmse_affine(x,y):
     X=np.c_[np.ones(len(x)),x];c=np.linalg.lstsq(X,y,rcond=None)[0];p=X@c
     return float(np.sqrt(np.mean((p-y)**2))/(np.std(y)+1e-12))
-
 def _diagnostics(family):
     envs=[];targets=[];support=('x0',) if family=='circular' else ('x0','x1')
     for s in DIAG_SEEDS:
@@ -76,10 +73,8 @@ def l0_nrmse(support,envs,target):
     exprs=l0_expressions(support);cols=[np.concatenate([evaluate(e,en) for en in envs]) for e in exprs]
     X=np.c_[np.ones(len(target)),*cols];c=np.linalg.lstsq(X,target,rcond=None)[0];p=X@c
     return float(np.sqrt(np.mean((p-target)**2))/(np.std(target)+1e-12))
-
 def _insert_new(new,allmap,c):
-    k=_key(c.out,c.typ)
-    old=allmap.get(k)
+    k=_key(c.out,c.typ);old=allmap.get(k)
     if old is not None:return False
     prior=new.get(k)
     if prior is None or c.nodes<prior.nodes:new[k]=c
@@ -114,36 +109,25 @@ def _build_through_depth2(leaves,target,checkpoint,family):
                         if _nrmse_affine(o,target)<=1e-8:return allmap,list(new.values()),counts,generated,e
         allmap.update(new);frontier=list(new.values());counts.append(len(allmap))
         checkpoint.parent.mkdir(parents=True,exist_ok=True);tmp=checkpoint.with_suffix('.tmp')
-        tmp.write_text(json.dumps({'family':family,'depth_completed':depth,'unique_functions_by_depth':counts,'generated_ast_candidates':generated,'found_equivalent':None,'preregistration_sha256':PREREG},indent=2));os.replace(tmp,checkpoint)
+        tmp.write_text(json.dumps({'family':family,'depth_completed':depth,'diagnostic_seeds':list(DIAG_SEEDS),'unique_functions_by_depth':counts,'generated_ast_candidates':generated,'found_equivalent':None,'preregistration_sha256':PREREG},indent=2));os.replace(tmp,checkpoint)
     return allmap,frontier,counts,generated,found
 
 def _exact_if_screen(op,a,b,target):
-    out=_binary(op,a.out,b.out)
-    return _nrmse_affine(out,target)<=1e-8
+    out=_binary(op,a.out,b.out);return _nrmse_affine(out,target)<=1e-8
 
 def _screen_root_pairs(frontier,allc,target):
-    """Exhaustively test every legal depth-3 binary root without materializing outputs.
-
-    The formulas compute the exact Pearson-r^2 of add/subtract/product roots in batches.
-    Any candidate capable of preregistered affine NRMSE <=1e-8 necessarily satisfies
-    r^2 >= SCREEN_R2, after which it is verified with the exact affine fit. This is a
-    meet-in-the-middle acceleration of the same typed AST space, not a pruning heuristic.
-    """
     T=np.asarray(target,float);T=T-T.mean();sst=float(T@T);n=len(T);tested=0;best_r2={}
     Braw=np.stack([c.out for c in allc]);Bmean=Braw.mean(1,keepdims=True);Bc=Braw-Bmean
-    Bss=np.sum(Bc*Bc,axis=1);Bcov=Bc@T;Bnodes=np.array([c.nodes for c in allc]);Btypes=np.array([c.typ for c in allc])
-
-    def inspect_matrix(r2,nodeok,op,batch,offset,bpool=allc):
+    Bss=np.sum(Bc*Bc,axis=1);Bcov=Bc@T;Bnodes=np.array([c.nodes for c in allc])
+    def inspect_matrix(r2,nodeok,op,batch,bpool=allc):
         nonlocal tested
         valid=nodeok & np.isfinite(r2);tested+=int(valid.sum())
         if not np.any(valid):return None
         masked=np.where(valid,r2,-1.0);mx=float(np.max(masked));best_r2[op]=max(best_r2.get(op,-1.0),mx)
-        hits=np.argwhere(masked>=SCREEN_R2)
-        for ii,jj in hits:
+        for ii,jj in np.argwhere(masked>=SCREEN_R2):
             a=batch[int(ii)];b=bpool[int(jj)]
             if _exact_if_screen(op,a,b,target):return Expr(op,(a.expr,b.expr))
         return None
-
     batch_size=192
     for lo in range(0,len(frontier),batch_size):
         batch=frontier[lo:lo+batch_size];Araw=np.stack([c.out for c in batch]);Ac=Araw-Araw.mean(1,keepdims=True)
@@ -151,21 +135,17 @@ def _screen_root_pairs(frontier,allc,target):
         cross=Ac@Bc.T
         with np.errstate(divide='ignore',invalid='ignore'):
             cov=Acov[:,None]+Bcov[None,:];ss=Ass[:,None]+Bss[None,:]+2*cross;r2=(cov*cov)/(sst*ss)
-        e=inspect_matrix(r2,nodeok,'add',batch,lo)
+        e=inspect_matrix(r2,nodeok,'add',batch)
         if e:return e,tested,best_r2
-        # A-B and B-A differ only by sign, so affine equivalence to the target is identical.
         with np.errstate(divide='ignore',invalid='ignore'):
             cov=Acov[:,None]-Bcov[None,:];ss=Ass[:,None]+Bss[None,:]-2*cross;r2=(cov*cov)/(sst*ss)
-        e=inspect_matrix(r2,nodeok,'subtract',batch,lo)
-        tested+=int(nodeok.sum())  # account for the reverse syntactic orientation as exhaustively covered by sign symmetry.
+        e=inspect_matrix(r2,nodeok,'subtract',batch);tested+=int(nodeok.sum())
         if e:return e,tested,best_r2
         M1=Araw@Braw.T;MT=(Araw*T)@Braw.T;M2=(Araw*Araw)@(Braw*Braw).T
         with np.errstate(divide='ignore',invalid='ignore'):
             ss=M2-M1*M1/n;r2=(MT*MT)/(sst*ss)
-        e=inspect_matrix(r2,nodeok,'product',batch,lo)
+        e=inspect_matrix(r2,nodeok,'product',batch)
         if e:return e,tested,best_r2
-
-    # interaction(a, mask): test both cases in which the depth-2 child is the value side or mask side.
     bool_all=[c for c in allc if c.typ=='bool'];bool_f2=[c for c in frontier if c.typ=='bool']
     def interaction_blocks(Apool,Bpool,label):
         nonlocal tested
@@ -189,46 +169,32 @@ def _screen_root_pairs(frontier,allc,target):
     return e,tested,best_r2
 
 def _screen_depth3_unary(frontier,target):
-    tested=0;best=1.0;found=None
+    tested=0;best=1.0
     for a in frontier:
         for op,pars in UNARY:
             if not valid_unary(op,a.expr):continue
             for p in pars:
                 if a.nodes+1>MAX_NODES:continue
-                e=Expr(op,(a.expr,),p);o=_unary(op,p,a.out);tested+=1
-                err=_nrmse_affine(o,target);best=min(best,err)
+                e=Expr(op,(a.expr,),p);o=_unary(op,p,a.out);tested+=1;err=_nrmse_affine(o,target);best=min(best,err)
                 if err<=1e-8:return e,tested,best
-    return found,tested,best
+    return None,tested,best
 
 def audit_family(family,checkpoint):
-    envs,target,leaves,support=_diagnostics(family)
-    ref=reference_expr(family);refout=np.concatenate([evaluate(ref,en) for en in envs]);referr=_nrmse_affine(refout,target);l0err=l0_nrmse(support,envs,target)
+    envs,target,leaves,support=_diagnostics(family);ref=reference_expr(family);refout=np.concatenate([evaluate(ref,en) for en in envs]);referr=_nrmse_affine(refout,target);l0err=l0_nrmse(support,envs,target)
     allmap,frontier,counts,generated,found=_build_through_depth2(leaves,target,checkpoint,family)
     depth3_unary_tested=0;depth3_binary_tested=0;best_unary=None;best_root={}
+    if found is None:found,depth3_unary_tested,best_unary=_screen_depth3_unary(frontier,target)
     if found is None:
-        found,depth3_unary_tested,best_unary=_screen_depth3_unary(frontier,target)
-    if found is None:
-        allc=list(allmap.values())+frontier
-        # Deduplicate across the not-yet-merged frontier while preserving minimal-node representatives.
-        tmp={}
+        allc=list(allmap.values())+frontier;tmp={}
         for c in allc:
             k=_key(c.out,c.typ);old=tmp.get(k)
             if old is None or c.nodes<old.nodes:tmp[k]=c
-        allc=list(tmp.values())
-        found,depth3_binary_tested,best_root=_screen_root_pairs(frontier,allc,target)
+        found,depth3_binary_tested,best_root=_screen_root_pairs(frontier,list(tmp.values()),target)
     depth3_complete=found is None
-    report={'family':family,'diagnostic_seeds':list(DIAG_SEEDS),'operator_support':list(support),'max_depth_exhaustive':3,'max_nodes':MAX_NODES,
-            'unique_functions_through_depth2':counts,'generated_ast_candidates_through_depth2':generated,
-            'depth3_unary_candidates_tested':depth3_unary_tested,'depth3_binary_ast_candidates_tested':depth3_binary_tested,
-            'depth3_best_unary_nrmse':best_unary,'depth3_best_root_r2':best_root,'depth_le3_equivalent_found':found.text() if found else None,
-            'reference_depth':ref.depth(),'reference_nodes':ref.nodes(),'reference_nrmse':referr,'l0_nrmse':l0err,
-            'audit_method':'functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3',
-            'pass':depth3_complete and len(counts)==3 and ref.depth()>=4 and ref.nodes()<=MAX_NODES and referr<=.02 and l0err>=.20}
-    checkpoint.parent.mkdir(parents=True,exist_ok=True);tmp=checkpoint.with_suffix('.tmp');tmp.write_text(json.dumps(report,indent=2));os.replace(tmp,checkpoint)
-    return report
+    report={'family':family,'diagnostic_seeds':list(DIAG_SEEDS),'operator_support':list(support),'max_depth_exhaustive':3,'max_nodes':MAX_NODES,'unique_functions_through_depth2':counts,'generated_ast_candidates_through_depth2':generated,'depth3_unary_candidates_tested':depth3_unary_tested,'depth3_binary_ast_candidates_tested':depth3_binary_tested,'depth3_best_unary_nrmse':best_unary,'depth3_best_root_r2':best_root,'depth_le3_equivalent_found':found.text() if found else None,'reference_depth':ref.depth(),'reference_nodes':ref.nodes(),'reference_nrmse':referr,'l0_nrmse':l0err,'audit_method':'functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3','pass':depth3_complete and len(counts)==3 and ref.depth()>=4 and ref.nodes()<=MAX_NODES and referr<=.02 and l0err>=.20}
+    checkpoint.parent.mkdir(parents=True,exist_ok=True);tmp=checkpoint.with_suffix('.tmp');tmp.write_text(json.dumps(report,indent=2));os.replace(tmp,checkpoint);return report
 
 p=argparse.ArgumentParser();p.add_argument('--family',choices=['circular','rank_interaction','all'],default='all');p.add_argument('--out',default='results/v4.19-reachability.json');p.add_argument('--checkpoint-dir',default='results/reachability-checkpoints');p.add_argument('--code-sha',default=os.environ.get('GITHUB_SHA','UNKNOWN'));a=p.parse_args()
-fams=['circular','rank_interaction'] if a.family=='all' else [a.family];results=[]
-for fam in fams:results.append(audit_family(fam,ROOT/a.checkpoint_dir/f'{fam}.json'))
+fams=['circular','rank_interaction'] if a.family=='all' else [a.family];results=[audit_family(fam,ROOT/a.checkpoint_dir/f'{fam}.json') for fam in fams]
 report={'preregistration_sha256':PREREG,'preregistration_git_blob_sha':PREREG_BLOB,'code_commit_sha':a.code_sha,'diagnostic_count':12,'families':results,'pass':all(x['pass'] for x in results) and len(results)==len(fams)}
 out=ROOT/a.out;out.parent.mkdir(parents=True,exist_ok=True);tmp=out.with_suffix('.tmp');tmp.write_text(json.dumps(report,indent=2));os.replace(tmp,out);print(json.dumps(report,indent=2))
