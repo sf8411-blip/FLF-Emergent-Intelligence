@@ -1,5 +1,6 @@
 name: v419-heavy-preT2
 
+# Trigger refresh: 2026-10-11. No preregistered gate, seed, DSL, budget, or benchmark semantics changed.
 on:
   workflow_dispatch:
   push:
