@@ -7,12 +7,11 @@ from .v419_worlds import make_world, reference_expr
 
 PREREG_SHA256=None
 PREREG_BLOB_SHA=None
-DOWNSTREAM_BUDGET=48  # v4.18.5 default evolution budget; equal for B0/B1/L1/B2/B3.
+DOWNSTREAM_BUDGET=48
 
 def set_integrity(prereg_sha256:str, prereg_blob_sha:str):
     global PREREG_SHA256, PREREG_BLOB_SHA
-    PREREG_SHA256=prereg_sha256; PREREG_BLOB_SHA=prereg_blob_sha
-
+    PREREG_SHA256=prereg_sha256;PREREG_BLOB_SHA=prereg_blob_sha
 
 def _augment(env,u):
     z=dict(env)
@@ -39,7 +38,10 @@ def _candidate_accept(b0,cand,expr):
 def run_one(family:str,seed:int,budget:int,search_seed:int,tier:str,frozen:bool,control_seed:int,code_sha:str='UNKNOWN'):
     if not PREREG_SHA256:raise RuntimeError('set_integrity must be called before evaluation')
     env,u,y=make_world(family,seed,700,0);tr,val,te=_split(env,u,y)
-    b0=_fit(tr,val,te,[],control_seed);b1=_fit(tr,val,te,[reference_expr(family)],control_seed)
+    b0=_fit(tr,val,te,[],control_seed)
+    # A3: the oracle is inserted only after learner residual formation/search inputs
+    # exist, and the adapter guarantees it occupies exactly one extension slot.
+    b1=_fit(tr,val,te,[reference_expr(family)],control_seed)
 
     prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed)
     accepted=False;expr=None;mdl_gain=0.0
@@ -49,20 +51,22 @@ def run_one(family:str,seed:int,budget:int,search_seed:int,tier:str,frozen:bool,
         else:l1=b0
     else:l1=b0
 
-    rnd_prop=random_proposal(tr[0],b0.train_residual,budget,search_seed+111);rnd=b0
+    # A3 matched randomization: controls use the same preregistered search seed,
+    # not hidden family-specific or out-of-range auxiliary seeds.
+    rnd_prop=random_proposal(tr[0],b0.train_residual,budget,search_seed);rnd=b0
     if rnd_prop.expr is not None:
         z=_fit(tr,val,te,[rnd_prop.expr],control_seed);ok,_=_candidate_accept(b0,z,rnd_prop.expr)
         if ok:rnd=z
 
-    sh_prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed+222,shuffled_residual=True);sh=b0
+    sh_prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed,shuffled_residual=True);sh=b0
     if sh_prop.expr is not None:
         z=_fit(tr,val,te,[sh_prop.expr],control_seed);ok,_=_candidate_accept(b0,z,sh_prop.expr)
         if ok:sh=z
-    dis_prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed+333,trigger_enabled=False)
+    dis_prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed,trigger_enabled=False)
 
     if accepted:
         env2,u2,y2=make_world(family,seed+700000,700,1);tr2,val2,te2=_split(env2,u2,y2)
-        tb0=_fit(tr2,val2,te2,[],control_seed+1);tb1=_fit(tr2,val2,te2,[reference_expr(family)],control_seed+1);tl1=_fit(tr2,val2,te2,[expr],control_seed+1)
+        tb0=_fit(tr2,val2,te2,[],control_seed);tb1=_fit(tr2,val2,te2,[reference_expr(family)],control_seed);tl1=_fit(tr2,val2,te2,[expr],control_seed)
         transfer_gap=(tb0.test_rmse-tl1.test_rmse)/max(tb0.test_rmse-tb1.test_rmse,1e-12)
     else:transfer_gap=float('nan')
 
@@ -72,26 +76,28 @@ def run_one(family:str,seed:int,budget:int,search_seed:int,tier:str,frozen:bool,
       'preregistration_sha256':PREREG_SHA256,'preregistration_git_blob_sha':PREREG_BLOB_SHA,'code_commit_sha':code_sha,
       'tier':tier,'frozen_test':frozen,'family':family,'seed':seed,'search_seed':search_seed,'control_seed':control_seed,
       'candidate_evaluations':prop.evaluations,'random_candidate_evaluations':rnd_prop.evaluations,
-      'downstream_model_evaluations_per_arm':DOWNSTREAM_BUDGET,'rng_state_ref':f'numpy-pcg64:{search_seed}',
+      'downstream_model_evaluations_per_arm':DOWNSTREAM_BUDGET,'rng_state_ref':f'numpy-pcg64-seed:{search_seed}',
       'accepted':accepted,'operator':expr.text() if expr else None,'operator_depth':expr.depth() if expr else None,'operator_nodes':expr.nodes() if expr else None,
       'functional_signature':_canonical_signature(expr) if expr else None,'trigger_score':prop.trigger_score,
-      'b0_error':b0e,'b1_error':b1e,'l1_error':l1e,'gap_closed':gap(l1e),
+      'b0_error':b0e,'b1_error':b1e,'oracle_gain':(b0e-b1e)/max(b0e,1e-12),'l1_error':l1e,'gap_closed':gap(l1e),
       'random_error':rnd.test_rmse,'random_gap_closed':gap(rnd.test_rmse),'shuffled_trigger_error':sh.test_rmse,'shuffled_gap_closed':gap(sh.test_rmse),
       'disabled_accepted':dis_prop.expr is not None,'transfer_gap_closed':transfer_gap,'ablation_damage':(b0e-l1e)/max(l1e,1e-12),
       'mdl_improvement':mdl_gain,'b0_residual_description_length':b0.description_length,
       'b0_feature_exprs':[e.text() for e in b0.exprs],'b0_genome':str(b0.genome),'b1_feature_exprs':[e.text() for e in b1.exprs]
     }
 
-def run_control(control:str,seed:int,budget:int,search_seed:int,tier:str,frozen:bool,code_sha='UNKNOWN'):
+def run_control(control:str,seed:int,budget:int,search_seed:int,tier:str,frozen:bool,control_seed:int|None=None,code_sha='UNKNOWN'):
     if not PREREG_SHA256:raise RuntimeError('set_integrity must be called before evaluation')
     family='null' if control=='null' else ('noise' if control=='noise' else 'actuator_shuffle')
-    env,u,y=make_world(family,seed,700,0);tr,val,te=_split(env,u,y);b0=_fit(tr,val,te,[],search_seed+700)
+    if control_seed is None:control_seed=search_seed
+    env,u,y=make_world(family,seed,700,0);tr,val,te=_split(env,u,y);b0=_fit(tr,val,te,[],control_seed)
     prop=propose_operator(tr[0],b0.train_residual,tr[1],budget,search_seed)
     accepted=False;expr=None;l1=b0
     if prop.expr is not None:
-        cand=_fit(tr,val,te,[prop.expr],search_seed+700);accepted,_=_candidate_accept(b0,cand,prop.expr)
+        cand=_fit(tr,val,te,[prop.expr],control_seed);accepted,_=_candidate_accept(b0,cand,prop.expr)
         if accepted:expr=prop.expr;l1=cand
     return {'preregistration_sha256':PREREG_SHA256,'preregistration_git_blob_sha':PREREG_BLOB_SHA,'code_commit_sha':code_sha,
-            'tier':tier,'frozen_test':frozen,'family':control,'seed':seed,'search_seed':search_seed,'candidate_evaluations':prop.evaluations,
-            'downstream_model_evaluations_per_arm':DOWNSTREAM_BUDGET,'rng_state_ref':f'numpy-pcg64:{search_seed}','accepted':accepted,
+            'tier':tier,'frozen_test':frozen,'family':control,'seed':seed,'search_seed':search_seed,'control_seed':control_seed,
+            'candidate_evaluations':prop.evaluations,'random_candidate_evaluations':0,
+            'downstream_model_evaluations_per_arm':DOWNSTREAM_BUDGET,'rng_state_ref':f'numpy-pcg64-seed:{search_seed}','accepted':accepted,
             'b0_error':b0.test_rmse,'l1_error':l1.test_rmse,'operator':expr.text() if expr else None,'trigger_score':prop.trigger_score}
