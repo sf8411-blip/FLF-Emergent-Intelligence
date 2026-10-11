@@ -53,4 +53,18 @@ class V419AntiCircularity(unittest.TestCase):
         self.assertIn('Reachability audit missing; T1/T2 blocked.',src)
         self.assertIn('refusing silent downscale',src)
 
+    def test_final_merge_bootstraps_functional_rediscovery_at_seed_level(self):
+        src=(ROOT/'merge_v419.py').read_text()
+        self.assertIn('def functional_seed_boot_ci',src)
+        self.assertIn('ix=r.integers(0,n,n)',src)
+        self.assertIn("'functional_similarity_ci':functional_seed_boot_ci(sig)",src)
+        self.assertNotIn("boot_ci(sims,'median')",src)
+
+    def test_final_merge_enforces_frozen_t2_integrity_metadata(self):
+        src=(ROOT/'merge_v419.py').read_text()
+        self.assertIn("r.get('tier')!='T2'",src)
+        self.assertIn("not r.get('frozen_test')",src)
+        for key in ('preregistration_git_blob_sha','code_commit_shas','seed_shards','candidate_evaluations_total','rng_state_refs'):
+            self.assertIn(key,src)
+
 if __name__=='__main__':unittest.main()
