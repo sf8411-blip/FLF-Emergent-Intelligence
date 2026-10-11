@@ -1,0 +1,18 @@
+{
+  "criteria": {
+    "R1": {"pass": true, "threshold": 0.95, "within_3pct_rate": 1.0},
+    "R2": {"families": {"corrupt_circular": {"ci95": [-0.0031985307760360334, 0.002035456706513253], "mean": -0.000522958227209632, "pass": true}, "corrupt_rank": {"ci95": [-0.004303594665429931, 0.0025734229129232592], "mean": -0.000990325260698803, "pass": true}}, "pass": true},
+    "R3": {"constant_mdl_cost": 0.5, "grid_matches": 0, "pass": true},
+    "R4": {"families": {"circular": {"B2_success_rate": 0.3125, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.2798756838663935, "oracle_min": 0.18362664588532163, "pass": true}, "rank": {"B2_success_rate": 0.3125, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.33504869759939643, "oracle_min": 0.17524958139693467, "pass": true}}, "pass": true},
+    "R5": {"false_open_rate": 0.03, "n": 200, "opened": 6, "pass": false},
+    "R6": {"challenge_p_max": 0.01, "novelty_r2_max": 0.5, "null_accept_rate": 0.0, "pass": true, "validation_gain_min": 0.05},
+    "R7": {"in_model_block_ablation_no_refit": "implemented in dress runner", "pass": true, "pooled_ratio_of_sums": "implemented in dress merger", "predictive_substitutability": "implemented in dress merger", "seed_level_bootstrap": true, "world_trace_functional_similarity": "implemented in dress merger"},
+    "R8": {"B2a_random_residual_selection": true, "B2b_random_validation_selection": true, "B3_search_ignores_trigger": true, "pass": true, "same_program_sampler": true}
+  },
+  "instrument_valid": false,
+  "iteration": 0,
+  "n_instrument": 32,
+  "n_noise": 200,
+  "workflow_run": 38139518070,
+  "note": "Iteration 0 failed only R5. Threshold percentile remains fixed at 99%; next iteration increases Monte Carlo resolution of the same block-permutation null from 199 to 999 permutations and uses fresh DEV seeds."
+}
