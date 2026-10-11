@@ -1,5 +1,6 @@
 name: v419-t1-repaired-preT2
 
+# Trigger refresh: 2026-10-11 after residual-trigger and seed-bootstrap conformance repairs. No gate, seed, DSL, benchmark, or budget changed.
 on:
   workflow_dispatch:
   push:
