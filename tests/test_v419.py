@@ -53,6 +53,20 @@ class V419AntiCircularity(unittest.TestCase):
         self.assertIn('Reachability audit missing; T1/T2 blocked.',src)
         self.assertIn('refusing silent downscale',src)
 
+    def test_residual_trigger_is_exactly_three_preregistered_components(self):
+        src=inspect.getsource(learner.trigger_components)
+        self.assertIn('_compression_gap_z',src)
+        self.assertIn('score=ac+inc+comp',src.replace(' ',''))
+        self.assertNotIn('sign_changes',src)
+        rng=np.random.default_rng(419)
+        actions=rng.normal(size=(480,2));res=np.zeros(480)
+        eps=rng.normal(scale=.25,size=480)
+        for i in range(1,len(res)):
+            res[i]=.78*res[i-1]+.45*actions[i,0]+eps[i]
+        score,ac,inc,comp=learner.trigger_components(res,actions,123.0)
+        self.assertAlmostEqual(score,ac+inc+comp,places=12)
+        self.assertGreater(ac,0.0);self.assertGreater(inc,0.0);self.assertGreater(comp,0.0)
+
     def test_final_merge_bootstraps_functional_rediscovery_at_seed_level(self):
         src=(ROOT/'merge_v419.py').read_text()
         self.assertIn('def functional_seed_boot_ci',src)
