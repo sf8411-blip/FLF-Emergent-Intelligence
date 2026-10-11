@@ -20,110 +20,106 @@ jobs:
       - name: Append A3 exactly once
         shell: bash
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('docs/v4.19_preregistration.md')
-          text=p.read_text()
-          marker='## Amendment A3 — 2026-10-11 — oracle-ceiling integrity and fresh pre-T2 protocol'
-          if marker in text:
-              print('A3 already present; no change.')
-              raise SystemExit(0)
-          amendment=r'''
+          set -euo pipefail
+          if grep -Fq '## Amendment A3 — 2026-10-11 — oracle-ceiling integrity and fresh pre-T2 protocol' docs/v4.19_preregistration.md; then
+            echo 'A3 already present; no change.'
+            exit 0
+          fi
+          cat >> docs/v4.19_preregistration.md <<'A3EOF'
 
----
+          ---
 
-## Amendment A3 — 2026-10-11 — oracle-ceiling integrity and fresh pre-T2 protocol
+          ## Amendment A3 — 2026-10-11 — oracle-ceiling integrity and fresh pre-T2 protocol
 
-### Reason
+          ### Reason
 
-The repaired post-G10 A2 T1 development pilot exposed a control-implementation defect before any frozen T2 seed was evaluated. In `W-RankInteraction`, the benchmark-only oracle expression was present in the feature pool but the training-only top-three feature selector frequently omitted it. Consequently `B1` was exactly equal to `B0` on many development seeds, and the preregistered oracle-gap denominator could collapse toward `1e-12`. This makes `B1` fail to function as an oracle ceiling and can produce numerically huge, scientifically meaningless `gap_closed` values.
+          The repaired post-G10 A2 T1 development pilot exposed a control-implementation defect before any frozen T2 seed was evaluated. In `W-RankInteraction`, the benchmark-only oracle expression was present in the feature pool but the training-only top-three feature selector frequently omitted it. Consequently `B1` was exactly equal to `B0` on many development seeds, and the preregistered oracle-gap denominator could collapse toward `1e-12`. This makes `B1` fail to function as an oracle ceiling and can produce numerically huge, scientifically meaningless `gap_closed` values.
 
-This amendment is committed after development-only T1 observations and **before any frozen T2 evaluation**. All prior A2 frozen ranges remain unused. No G1-G10 threshold is lowered, no synthesis primitive is added, no missing-operator template is introduced, and no candidate/search budget is reduced.
+          This amendment is committed after development-only T1 observations and **before any frozen T2 evaluation**. All prior A2 frozen ranges remain unused. No G1-G10 threshold is lowered, no synthesis primitive is added, no missing-operator template is introduced, and no candidate/search budget is reduced.
 
-### Uniform extension-slot rule
+          ### Uniform extension-slot rule
 
-For all post-A3 downstream v4.18.5 adapter arms:
+          For all post-A3 downstream v4.18.5 adapter arms:
 
-- `B0` selects all three feature slots from `L0` only.
-- Whenever exactly one extension expression is supplied to an arm (`B1` oracle, `L1` residual-guided, `B2` random-composition, or `B3-shuffled`), that extension occupies exactly one of the three feature slots.
-- The remaining two slots are selected from `L0` using training data only and the same selector/scoring rule for every arm.
-- The same unchanged v4.18.5 `G`, `Model`, mutation, crossover, and 48-model downstream evaluation budget is used for every arm.
-- Candidate acceptance remains exactly the preregistered validation/MDL rule. For `L1/B2/B3`, forcing a candidate into one slot does not force acceptance; a harmful candidate is rejected and the arm falls back to `B0`.
-- `B1` is benchmark-only and does not expose the oracle expression, family identity, hidden state, or oracle output to the learner/synthesizer. The oracle is used only after candidate search for the ceiling calculation.
+          - `B0` selects all three feature slots from `L0` only.
+          - Whenever exactly one extension expression is supplied to an arm (`B1` oracle, `L1` residual-guided, `B2` random-composition, or `B3-shuffled`), that extension occupies exactly one of the three feature slots.
+          - The remaining two slots are selected from `L0` using training data only and the same selector/scoring rule for every arm.
+          - The same unchanged v4.18.5 `G`, `Model`, mutation, crossover, and 48-model downstream evaluation budget is used for every arm.
+          - Candidate acceptance remains exactly the preregistered validation/MDL rule. For `L1/B2/B3`, forcing a candidate into one slot does not force acceptance; a harmful candidate is rejected and the arm falls back to `B0`.
+          - `B1` is benchmark-only and does not expose the oracle expression, family identity, hidden state, or oracle output to the learner/synthesizer. The oracle is used only after candidate search for the ceiling calculation.
 
-This rule makes `L0 + g` literal and symmetric across all extension arms while restoring `B1` as a meaningful ceiling.
+          This rule makes `L0 + g` literal and symmetric across all extension arms while restoring `B1` as a meaningful ceiling.
 
-### G0 — oracle-ceiling integrity (new stricter prerequisite)
+          ### G0 — oracle-ceiling integrity (new stricter prerequisite)
 
-For each non-null family separately on frozen T2, define seed-level:
+          For each non-null family separately on frozen T2, define seed-level:
 
-`oracle_gain = (B0_error - B1_error) / max(B0_error, 1e-12)`.
+          `oracle_gain = (B0_error - B1_error) / max(B0_error, 1e-12)`.
 
-Require both:
+          Require both:
 
-- mean `oracle_gain >= 0.10`, and
-- seed-level nonparametric bootstrap 95% CI lower bound `>= 0.05` using the same preregistered `20,000` resamples.
+          - mean `oracle_gain >= 0.10`, and
+          - seed-level nonparametric bootstrap 95% CI lower bound `>= 0.05` using the same preregistered `20,000` resamples.
 
-`PASS` now requires **G0 and every unchanged G1-G10 gate**. If G0 fails after complete T2, the verdict is `FAIL (oracle ceiling / benchmark invalid)`; frozen results are not reinterpreted or filtered.
+          `PASS` now requires **G0 and every unchanged G1-G10 gate**. If G0 fails after complete T2, the verdict is `FAIL (oracle ceiling / benchmark invalid)`; frozen results are not reinterpreted or filtered.
 
-G1-G10 thresholds, definitions, and bootstrap/binomial rules remain unchanged except for the previously required clarification that G4 resamples accepted operator **seeds** and recomputes the pairwise functional-similarity median inside each bootstrap replicate; pairwise similarities are never treated as independent resampling units.
+          G1-G10 thresholds, definitions, and bootstrap/binomial rules remain unchanged except for the previously required clarification that G4 resamples accepted operator **seeds** and recomputes the pairwise functional-similarity median inside each bootstrap replicate; pairwise similarities are never treated as independent resampling units.
 
-### Exact residual-trigger estimators
+          ### Exact residual-trigger estimators
 
-To eliminate the implementation ambiguity found during the pre-T2 source audit, the already-preregistered three-component trigger is operationally frozen as follows, using learner-visible quantities only:
+          To eliminate the implementation ambiguity found during the pre-T2 source audit, the already-preregistered three-component trigger is operationally frozen as follows, using learner-visible quantities only:
 
-1. `z(residual_autocorrelation)`: absolute Fisher-z score of residual lag-1 correlation;
-2. `z(intervention_effect_inconsistency)`: maximum absolute Fisher-z score between each anonymous action channel and the residual;
-3. `z(compression_gap)`: `sqrt(G^2)` likelihood-ratio statistic comparing the 2x2 median-sign residual-transition table with its iid-sign independence model.
+          1. `z(residual_autocorrelation)`: absolute Fisher-z score of residual lag-1 correlation;
+          2. `z(intervention_effect_inconsistency)`: maximum absolute Fisher-z score between each anonymous action channel and the residual;
+          3. `z(compression_gap)`: `sqrt(G^2)` likelihood-ratio statistic comparing the 2x2 median-sign residual-transition table with its iid-sign independence model.
 
-The trigger remains the **sum** of these three terms and remains open only at `trigger_score >= 2.5`. No hidden benchmark quantity enters any term.
+          The trigger remains the **sum** of these three terms and remains open only at `trigger_score >= 2.5`. No hidden benchmark quantity enters any term.
 
-### Fresh A3 development and diagnostic seeds
+          ### Fresh A3 development and diagnostic seeds
 
-All A2 development seeds are retired for tuning/evaluation and remain archived as development-only results.
+          All A2 development seeds are retired for tuning/evaluation and remain archived as development-only results.
 
-- A3 T0/T1 world seeds: `1600..1619`
-- A3 synthesis/search seeds: `10000..10019`
-- A3 diagnostic/bootstrap-only seed pool: `12000..12999`
-- A3 G10 diagnostic traces: `12000..12011`
+          - A3 T0/T1 world seeds: `1600..1619`
+          - A3 synthesis/search seeds: `10000..10019`
+          - A3 diagnostic/bootstrap-only seed pool: `12000..12999`
+          - A3 G10 diagnostic traces: `12000..12011`
 
-Before frozen T2, G10 must be rerun on the fresh A3 diagnostic traces and must satisfy the unchanged depth/non-approximation conditions under the new preregistration hash.
+          Before frozen T2, G10 must be rerun on the fresh A3 diagnostic traces and must satisfy the unchanged depth/non-approximation conditions under the new preregistration hash.
 
-A3 T1 remains development-only and has no inferential PASS/FAIL gate. It is used only to verify mechanical validity of the corrected oracle ceiling, exact evaluation budgets, controls, checkpoint integrity, and absence of numerical pathologies. No G1-G10 threshold or search heuristic may be tuned to A3 T1 outcomes.
+          A3 T1 remains development-only and has no inferential PASS/FAIL gate. It is used only to verify mechanical validity of the corrected oracle ceiling, exact evaluation budgets, controls, checkpoint integrity, and absence of numerical pathologies. No G1-G10 threshold or search heuristic may be tuned to A3 T1 outcomes.
 
-### Fresh A3 frozen T2 seeds
+          ### Fresh A3 frozen T2 seeds
 
-All A2 frozen ranges are retired unused. The only valid post-A3 frozen ranges are:
+          All A2 frozen ranges are retired unused. The only valid post-A3 frozen ranges are:
 
-- `W-Circular`: `81000..81023` (24 seeds)
-- `W-RankInteraction`: `82000..82023` (24 seeds)
-- `W-Null`: `83000..83023` (24 seeds)
-- `C-actuator-shuffle`: `91000..91023` (24 seeds)
-- `C-noise`: `91100..91123` (24 seeds)
-- auxiliary control/search randomization seeds must lie in `91200..91999` and may not overlap a world-seed range.
+          - `W-Circular`: `81000..81023` (24 seeds)
+          - `W-RankInteraction`: `82000..82023` (24 seeds)
+          - `W-Null`: `83000..83023` (24 seeds)
+          - `C-actuator-shuffle`: `91000..91023` (24 seeds)
+          - `C-noise`: `91100..91123` (24 seeds)
+          - auxiliary control/search randomization seeds must lie in `91200..91999` and may not overlap a world-seed range.
 
-T2 remains one frozen evaluation per seed. Completed seed records are immutable. GitHub Actions T2 sharding must use one frozen seed-record per matrix job so a failed job can be rerun without reevaluating successful seed records.
+          T2 remains one frozen evaluation per seed. Completed seed records are immutable. GitHub Actions T2 sharding must use one frozen seed-record per matrix job so a failed job can be rerun without reevaluating successful seed records.
 
-### Budget and checkpoint integrity
+          ### Budget and checkpoint integrity
 
-The original budgets remain unchanged:
+          The original budgets remain unchanged:
 
-- T0: `200`
-- T1: `2,000`
-- T2: `20,000`
+          - T0: `200`
+          - T1: `2,000`
+          - T2: `20,000`
 
-When a residual-guided or B2 synthesis search is opened, it receives exactly the tier budget; no T1/T2 run may override the preregistered budget. B0/B1/L1/B2/B3 retain equal downstream budget availability of 48 v4.18.5 model evaluations per arm.
+          When a residual-guided or B2 synthesis search is opened, it receives exactly the tier budget; no T1/T2 run may override the preregistered budget. B0/B1/L1/B2/B3 retain equal downstream budget availability of 48 v4.18.5 model evaluations per arm.
 
-Each JSONL seed record must continue to carry the exact preregistration SHA-256 / Git blob SHA, code commit SHA, tier, seed, shard, candidate-evaluation counts, frozen flag, and a lossless PCG64 seed/state reference. Post-A3 T2 result merging must reject any pre-A3 hash or seed.
+          Each JSONL seed record must continue to carry the exact preregistration SHA-256 / Git blob SHA, code commit SHA, tier, seed, shard, candidate-evaluation counts, frozen flag, and a lossless PCG64 seed/state reference. Post-A3 T2 result merging must reject any pre-A3 hash or seed.
 
-### A3 integrity rule
+          ### A3 integrity rule
 
-Every A3 experiment/result/checkpoint/summary must use the SHA-256 and Git blob SHA of this amended file. The A2 G10 and T1 results remain archived historical evidence and cannot satisfy A3 G0-G10. No A3 experiment may begin until this amendment commit exists.
-'''
-          p.write_text(text.rstrip()+amendment+'\n')
-          PY
+          Every A3 experiment/result/checkpoint/summary must use the SHA-256 and Git blob SHA of this amended file. The A2 G10 and T1 results remain archived historical evidence and cannot satisfy A3 G0-G10. No A3 experiment may begin until this amendment commit exists.
+          A3EOF
       - name: Commit A3 preregistration before any A3 experiment
         run: |
+          set -euo pipefail
           if git diff --quiet -- docs/v4.19_preregistration.md; then
             echo 'No preregistration change to commit.'
             exit 0
