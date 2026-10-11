@@ -1,0 +1,968 @@
+{
+  "preregistration_sha256": "c85ad79c34a46e8f698a5e6ca9b1cb0b027501c2b3f782be5d35c6d46899492b",
+  "preregistration_git_blob_sha": "10d8be3aa63b59f5cf0e538116664e4336d6f320",
+  "code_commit_shas": [
+    "109659ecd736ccf934de7be5aaf8048242b2726a"
+  ],
+  "tier": "T2",
+  "frozen_test": true,
+  "n_rows": 120,
+  "seed_shards": [
+    {
+      "family": "circular",
+      "seed": 81000,
+      "shard": "0/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81001,
+      "shard": "1/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81010,
+      "shard": "10/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91104,
+      "shard": "100/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91105,
+      "shard": "101/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91106,
+      "shard": "102/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91107,
+      "shard": "103/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91108,
+      "shard": "104/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91109,
+      "shard": "105/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91110,
+      "shard": "106/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91111,
+      "shard": "107/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91112,
+      "shard": "108/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91113,
+      "shard": "109/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81011,
+      "shard": "11/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91114,
+      "shard": "110/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91115,
+      "shard": "111/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91116,
+      "shard": "112/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91117,
+      "shard": "113/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91118,
+      "shard": "114/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91119,
+      "shard": "115/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91120,
+      "shard": "116/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91121,
+      "shard": "117/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91122,
+      "shard": "118/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91123,
+      "shard": "119/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81012,
+      "shard": "12/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81013,
+      "shard": "13/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81014,
+      "shard": "14/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81015,
+      "shard": "15/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81016,
+      "shard": "16/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81017,
+      "shard": "17/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81018,
+      "shard": "18/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81019,
+      "shard": "19/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81002,
+      "shard": "2/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81020,
+      "shard": "20/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81021,
+      "shard": "21/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81022,
+      "shard": "22/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81023,
+      "shard": "23/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82000,
+      "shard": "24/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82001,
+      "shard": "25/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82002,
+      "shard": "26/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82003,
+      "shard": "27/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82004,
+      "shard": "28/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82005,
+      "shard": "29/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81003,
+      "shard": "3/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82006,
+      "shard": "30/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82007,
+      "shard": "31/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82008,
+      "shard": "32/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82009,
+      "shard": "33/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82010,
+      "shard": "34/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82011,
+      "shard": "35/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82012,
+      "shard": "36/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82013,
+      "shard": "37/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82014,
+      "shard": "38/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82015,
+      "shard": "39/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81004,
+      "shard": "4/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82016,
+      "shard": "40/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82017,
+      "shard": "41/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82018,
+      "shard": "42/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82019,
+      "shard": "43/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82020,
+      "shard": "44/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82021,
+      "shard": "45/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82022,
+      "shard": "46/120"
+    },
+    {
+      "family": "rank_interaction",
+      "seed": 82023,
+      "shard": "47/120"
+    },
+    {
+      "family": "null",
+      "seed": 83000,
+      "shard": "48/120"
+    },
+    {
+      "family": "null",
+      "seed": 83001,
+      "shard": "49/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81005,
+      "shard": "5/120"
+    },
+    {
+      "family": "null",
+      "seed": 83002,
+      "shard": "50/120"
+    },
+    {
+      "family": "null",
+      "seed": 83003,
+      "shard": "51/120"
+    },
+    {
+      "family": "null",
+      "seed": 83004,
+      "shard": "52/120"
+    },
+    {
+      "family": "null",
+      "seed": 83005,
+      "shard": "53/120"
+    },
+    {
+      "family": "null",
+      "seed": 83006,
+      "shard": "54/120"
+    },
+    {
+      "family": "null",
+      "seed": 83007,
+      "shard": "55/120"
+    },
+    {
+      "family": "null",
+      "seed": 83008,
+      "shard": "56/120"
+    },
+    {
+      "family": "null",
+      "seed": 83009,
+      "shard": "57/120"
+    },
+    {
+      "family": "null",
+      "seed": 83010,
+      "shard": "58/120"
+    },
+    {
+      "family": "null",
+      "seed": 83011,
+      "shard": "59/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81006,
+      "shard": "6/120"
+    },
+    {
+      "family": "null",
+      "seed": 83012,
+      "shard": "60/120"
+    },
+    {
+      "family": "null",
+      "seed": 83013,
+      "shard": "61/120"
+    },
+    {
+      "family": "null",
+      "seed": 83014,
+      "shard": "62/120"
+    },
+    {
+      "family": "null",
+      "seed": 83015,
+      "shard": "63/120"
+    },
+    {
+      "family": "null",
+      "seed": 83016,
+      "shard": "64/120"
+    },
+    {
+      "family": "null",
+      "seed": 83017,
+      "shard": "65/120"
+    },
+    {
+      "family": "null",
+      "seed": 83018,
+      "shard": "66/120"
+    },
+    {
+      "family": "null",
+      "seed": 83019,
+      "shard": "67/120"
+    },
+    {
+      "family": "null",
+      "seed": 83020,
+      "shard": "68/120"
+    },
+    {
+      "family": "null",
+      "seed": 83021,
+      "shard": "69/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81007,
+      "shard": "7/120"
+    },
+    {
+      "family": "null",
+      "seed": 83022,
+      "shard": "70/120"
+    },
+    {
+      "family": "null",
+      "seed": 83023,
+      "shard": "71/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91000,
+      "shard": "72/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91001,
+      "shard": "73/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91002,
+      "shard": "74/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91003,
+      "shard": "75/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91004,
+      "shard": "76/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91005,
+      "shard": "77/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91006,
+      "shard": "78/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91007,
+      "shard": "79/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81008,
+      "shard": "8/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91008,
+      "shard": "80/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91009,
+      "shard": "81/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91010,
+      "shard": "82/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91011,
+      "shard": "83/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91012,
+      "shard": "84/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91013,
+      "shard": "85/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91014,
+      "shard": "86/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91015,
+      "shard": "87/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91016,
+      "shard": "88/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91017,
+      "shard": "89/120"
+    },
+    {
+      "family": "circular",
+      "seed": 81009,
+      "shard": "9/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91018,
+      "shard": "90/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91019,
+      "shard": "91/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91020,
+      "shard": "92/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91021,
+      "shard": "93/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91022,
+      "shard": "94/120"
+    },
+    {
+      "family": "actuator_shuffle",
+      "seed": 91023,
+      "shard": "95/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91100,
+      "shard": "96/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91101,
+      "shard": "97/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91102,
+      "shard": "98/120"
+    },
+    {
+      "family": "noise",
+      "seed": 91103,
+      "shard": "99/120"
+    }
+  ],
+  "candidate_evaluations_total": 2160000,
+  "random_candidate_evaluations_total": 960000,
+  "rng_state_refs": [
+    "numpy-pcg64-seed:91200",
+    "numpy-pcg64-seed:91201",
+    "numpy-pcg64-seed:91202",
+    "numpy-pcg64-seed:91203",
+    "numpy-pcg64-seed:91204",
+    "numpy-pcg64-seed:91205",
+    "numpy-pcg64-seed:91206",
+    "numpy-pcg64-seed:91207",
+    "numpy-pcg64-seed:91208",
+    "numpy-pcg64-seed:91209",
+    "numpy-pcg64-seed:91210",
+    "numpy-pcg64-seed:91211",
+    "numpy-pcg64-seed:91212",
+    "numpy-pcg64-seed:91213",
+    "numpy-pcg64-seed:91214",
+    "numpy-pcg64-seed:91215",
+    "numpy-pcg64-seed:91216",
+    "numpy-pcg64-seed:91217",
+    "numpy-pcg64-seed:91218",
+    "numpy-pcg64-seed:91219",
+    "numpy-pcg64-seed:91220",
+    "numpy-pcg64-seed:91221",
+    "numpy-pcg64-seed:91222",
+    "numpy-pcg64-seed:91223",
+    "numpy-pcg64-seed:91224",
+    "numpy-pcg64-seed:91225",
+    "numpy-pcg64-seed:91226",
+    "numpy-pcg64-seed:91227",
+    "numpy-pcg64-seed:91228",
+    "numpy-pcg64-seed:91229",
+    "numpy-pcg64-seed:91230",
+    "numpy-pcg64-seed:91231",
+    "numpy-pcg64-seed:91232",
+    "numpy-pcg64-seed:91233",
+    "numpy-pcg64-seed:91234",
+    "numpy-pcg64-seed:91235",
+    "numpy-pcg64-seed:91236",
+    "numpy-pcg64-seed:91237",
+    "numpy-pcg64-seed:91238",
+    "numpy-pcg64-seed:91239",
+    "numpy-pcg64-seed:91240",
+    "numpy-pcg64-seed:91241",
+    "numpy-pcg64-seed:91242",
+    "numpy-pcg64-seed:91243",
+    "numpy-pcg64-seed:91244",
+    "numpy-pcg64-seed:91245",
+    "numpy-pcg64-seed:91246",
+    "numpy-pcg64-seed:91247",
+    "numpy-pcg64-seed:91248",
+    "numpy-pcg64-seed:91249",
+    "numpy-pcg64-seed:91250",
+    "numpy-pcg64-seed:91251",
+    "numpy-pcg64-seed:91252",
+    "numpy-pcg64-seed:91253",
+    "numpy-pcg64-seed:91254",
+    "numpy-pcg64-seed:91255",
+    "numpy-pcg64-seed:91256",
+    "numpy-pcg64-seed:91257",
+    "numpy-pcg64-seed:91258",
+    "numpy-pcg64-seed:91259",
+    "numpy-pcg64-seed:91260",
+    "numpy-pcg64-seed:91261",
+    "numpy-pcg64-seed:91262",
+    "numpy-pcg64-seed:91263",
+    "numpy-pcg64-seed:91264",
+    "numpy-pcg64-seed:91265",
+    "numpy-pcg64-seed:91266",
+    "numpy-pcg64-seed:91267",
+    "numpy-pcg64-seed:91268",
+    "numpy-pcg64-seed:91269",
+    "numpy-pcg64-seed:91270",
+    "numpy-pcg64-seed:91271",
+    "numpy-pcg64-seed:91272",
+    "numpy-pcg64-seed:91273",
+    "numpy-pcg64-seed:91274",
+    "numpy-pcg64-seed:91275",
+    "numpy-pcg64-seed:91276",
+    "numpy-pcg64-seed:91277",
+    "numpy-pcg64-seed:91278",
+    "numpy-pcg64-seed:91279",
+    "numpy-pcg64-seed:91280",
+    "numpy-pcg64-seed:91281",
+    "numpy-pcg64-seed:91282",
+    "numpy-pcg64-seed:91283",
+    "numpy-pcg64-seed:91284",
+    "numpy-pcg64-seed:91285",
+    "numpy-pcg64-seed:91286",
+    "numpy-pcg64-seed:91287",
+    "numpy-pcg64-seed:91288",
+    "numpy-pcg64-seed:91289",
+    "numpy-pcg64-seed:91290",
+    "numpy-pcg64-seed:91291",
+    "numpy-pcg64-seed:91292",
+    "numpy-pcg64-seed:91293",
+    "numpy-pcg64-seed:91294",
+    "numpy-pcg64-seed:91295",
+    "numpy-pcg64-seed:91296",
+    "numpy-pcg64-seed:91297",
+    "numpy-pcg64-seed:91298",
+    "numpy-pcg64-seed:91299",
+    "numpy-pcg64-seed:91300",
+    "numpy-pcg64-seed:91301",
+    "numpy-pcg64-seed:91302",
+    "numpy-pcg64-seed:91303",
+    "numpy-pcg64-seed:91304",
+    "numpy-pcg64-seed:91305",
+    "numpy-pcg64-seed:91306",
+    "numpy-pcg64-seed:91307",
+    "numpy-pcg64-seed:91308",
+    "numpy-pcg64-seed:91309",
+    "numpy-pcg64-seed:91310",
+    "numpy-pcg64-seed:91311",
+    "numpy-pcg64-seed:91312",
+    "numpy-pcg64-seed:91313",
+    "numpy-pcg64-seed:91314",
+    "numpy-pcg64-seed:91315",
+    "numpy-pcg64-seed:91316",
+    "numpy-pcg64-seed:91317",
+    "numpy-pcg64-seed:91318",
+    "numpy-pcg64-seed:91319"
+  ],
+  "families": {
+    "circular": {
+      "n": 24,
+      "accepted_operator_seeds": 22,
+      "oracle_gain_mean": 0.32937768668696005,
+      "oracle_gain_ci": [
+        0.2959519813453995,
+        0.3616817755565167
+      ],
+      "gap_closed_mean": 0.8529941223927276,
+      "gap_closed_ci": [
+        0.715070709198321,
+        0.9797566973942723
+      ],
+      "transfer_mean": 0.9773440677680226,
+      "transfer_ci": [
+        0.7833698313249353,
+        1.196542760892521
+      ],
+      "ablation_mean": 0.42112661478987207,
+      "ablation_ci": [
+        0.33333678890508106,
+        0.5104434937030532
+      ],
+      "mdl_improvement_mean": 125.00409145516124,
+      "mdl_margin_ci": [
+        79.19793151349266,
+        123.07676957761585
+      ],
+      "residual_minus_random_mean": -0.01697256151520934,
+      "residual_minus_random_ci": [
+        -0.16913299694838993,
+        0.1170103519860802
+      ],
+      "residual_minus_shuffled_mean": 0.8529941223927276,
+      "residual_minus_shuffled_ci": [
+        0.715070709198321,
+        0.9797566973942723
+      ],
+      "functional_similarity_median": 0.16421812370651087,
+      "functional_similarity_ci": [
+        0.09756458209978312,
+        0.5031872805218847
+      ],
+      "G0": true,
+      "G1": true,
+      "G2": true,
+      "G3": true,
+      "G4": false,
+      "G5": true,
+      "G6": false,
+      "G7": true
+    },
+    "rank_interaction": {
+      "n": 24,
+      "accepted_operator_seeds": 3,
+      "oracle_gain_mean": 0.14085645708305106,
+      "oracle_gain_ci": [
+        0.08572920406060207,
+        0.19558334970588898
+      ],
+      "gap_closed_mean": 0.33972180395397683,
+      "gap_closed_ci": [
+        0.0,
+        0.9963635101129881
+      ],
+      "transfer_mean": -0.12344490268034669,
+      "transfer_ci": [
+        -0.9895985586773121,
+        0.3269926097072572
+      ],
+      "ablation_mean": 0.008148047777705761,
+      "ablation_ci": [
+        0.0,
+        0.019426222763887543
+      ],
+      "mdl_improvement_mean": 9.524256521452315,
+      "mdl_margin_ci": [
+        -20.930070541560404,
+        -4.773709998646124
+      ],
+      "residual_minus_random_mean": 0.32789213148698093,
+      "residual_minus_random_ci": [
+        0.0,
+        0.9795556833630273
+      ],
+      "residual_minus_shuffled_mean": 0.33972180395397683,
+      "residual_minus_shuffled_ci": [
+        0.0,
+        0.9963635101129881
+      ],
+      "functional_similarity_median": 0.25648970924267217,
+      "functional_similarity_ci": [
+        0.1847198429044448,
+        1.0
+      ],
+      "G0": true,
+      "G1": false,
+      "G2": false,
+      "G3": false,
+      "G4": false,
+      "G5": false,
+      "G6": false,
+      "G7": false
+    }
+  },
+  "gates": {
+    "G10": true,
+    "G0_oracle_integrity_all_families": true,
+    "all_non_reachability": false
+  },
+  "verdict": "FAIL",
+  "null": {
+    "n": 24,
+    "accept_rate": 0.5833333333333334,
+    "cp95_upper": 0.7789030946533215,
+    "G8": false
+  },
+  "actuator_shuffle": {
+    "n": 24,
+    "accept_rate": 0.9583333333333334,
+    "cp95_upper": 0.9989456475545302,
+    "G9": false
+  },
+  "noise": {
+    "n": 24,
+    "accept_rate": 0.0,
+    "cp95_upper": 0.1424735977225256,
+    "G9": true
+  },
+  "reachability": {
+    "preregistration_sha256": "c85ad79c34a46e8f698a5e6ca9b1cb0b027501c2b3f782be5d35c6d46899492b",
+    "preregistration_git_blob_sha": "10d8be3aa63b59f5cf0e538116664e4336d6f320",
+    "code_commit_shas": [
+      "93f87814de7b941fb2cc1f25525f6b58dc42d837"
+    ],
+    "diagnostic_count": 12,
+    "families": [
+      {
+        "family": "circular",
+        "diagnostic_seeds": [
+          12000,
+          12001,
+          12002,
+          12003,
+          12004,
+          12005,
+          12006,
+          12007,
+          12008,
+          12009,
+          12010,
+          12011
+        ],
+        "operator_support": [
+          "x0"
+        ],
+        "max_depth_exhaustive": 3,
+        "max_nodes": 11,
+        "unique_functions_through_depth2": [
+          1,
+          22,
+          1096
+        ],
+        "generated_ast_candidates_through_depth2": 2540,
+        "depth3_unary_candidates_tested": 22980,
+        "depth3_binary_ast_candidates_tested": 4063392,
+        "depth3_best_unary_nrmse": 0.5986786282403874,
+        "depth3_best_root_r2": {
+          "add": 0.7555126631625885,
+          "subtract": 0.7555126631625938,
+          "product": 0.6912253682225241,
+          "interaction_value_depth2": 0.6912253682225241,
+          "interaction_mask_depth2": 0.6912253682225241
+        },
+        "depth_le3_equivalent_found": null,
+        "reference_depth": 4,
+        "reference_nodes": 11,
+        "reference_nrmse": 2.107195255482605e-16,
+        "l0_nrmse": 0.9772063445332065,
+        "audit_method": "functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3",
+        "pass": true
+      },
+      {
+        "family": "rank_interaction",
+        "diagnostic_seeds": [
+          12000,
+          12001,
+          12002,
+          12003,
+          12004,
+          12005,
+          12006,
+          12007,
+          12008,
+          12009,
+          12010,
+          12011
+        ],
+        "operator_support": [
+          "x0",
+          "x1"
+        ],
+        "max_depth_exhaustive": 3,
+        "max_nodes": 11,
+        "unique_functions_through_depth2": [
+          2,
+          55,
+          5809
+        ],
+        "generated_ast_candidates_through_depth2": 14074,
+        "depth3_unary_candidates_tested": 124878,
+        "depth3_binary_ast_candidates_tested": 94127507,
+        "depth3_best_unary_nrmse": 0.735873138622803,
+        "depth3_best_root_r2": {
+          "add": 0.32397735953546075,
+          "subtract": 0.595810767389962,
+          "product": 0.8424992095784429,
+          "interaction_value_depth2": 0.8424992095784429,
+          "interaction_mask_depth2": 0.8424992095784429
+        },
+        "depth_le3_equivalent_found": null,
+        "reference_depth": 4,
+        "reference_nodes": 8,
+        "reference_nrmse": 1.1128434365666586e-15,
+        "l0_nrmse": 0.8294835515771618,
+        "audit_method": "functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3",
+        "pass": true
+      }
+    ],
+    "pass": true
+  }
+}
