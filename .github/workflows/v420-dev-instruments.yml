@@ -5,7 +5,7 @@ on:
       iteration:
         description: 'DEV iteration 0..4'
         required: true
-        default: '2'
+        default: '3'
   push:
     branches: [v4.20-wip]
     paths:
@@ -29,7 +29,7 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - name: Run one fresh DEV seed
         env:
-          ITERATION: ${{ github.event.inputs.iteration || '2' }}
+          ITERATION: ${{ github.event.inputs.iteration || '3' }}
         run: python run_v420_dev.py --mode instrument --iteration "$ITERATION" --index ${{ matrix.index }} --out results/v4.20-dev/instrument/seed-${{ matrix.index }}.json
       - uses: actions/upload-artifact@v4
         with:
@@ -45,7 +45,7 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - name: Run 200 fresh DEV noise traces
         env:
-          ITERATION: ${{ github.event.inputs.iteration || '2' }}
+          ITERATION: ${{ github.event.inputs.iteration || '3' }}
         shell: bash
         run: |
           for i in $(seq 0 199); do
