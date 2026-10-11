@@ -1,0 +1,18 @@
+{
+  "criteria": {
+    "R1": {"pass": true, "threshold": 0.95, "within_3pct_rate": 1.0},
+    "R2": {"families": {"corrupt_circular": {"ci95": [-0.0035233984895080917, -0.0007056531838050581], "mean": -0.0020772389905255664, "pass": false}, "corrupt_rank": {"ci95": [-0.0027351407716289977, 0.00031703035006077143], "mean": -0.0011116307416046455, "pass": true}}, "pass": false},
+    "R3": {"constant_mdl_cost": 0.5, "grid_matches": 0, "pass": true},
+    "R4": {"families": {"circular": {"B2_success_rate": 0.34375, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.3009582592426745, "oracle_min": 0.14997230379057658, "pass": true}, "rank": {"B2_success_rate": 0.34375, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.34398982134180056, "oracle_min": 0.10065559452934922, "pass": true}}, "pass": true},
+    "R5": {"false_open_rate": 0.0, "n": 200, "opened": 0, "pass": true},
+    "R6": {"challenge_p_max": 0.01, "novelty_r2_max": 0.5, "null_accept_rate": 0.0, "pass": true, "validation_gain_min": 0.05},
+    "R7": {"in_model_block_ablation_no_refit": "implemented in dress runner", "pass": true, "pooled_ratio_of_sums": "implemented in dress merger", "predictive_substitutability": "implemented in dress merger", "seed_level_bootstrap": true, "world_trace_functional_similarity": "implemented in dress merger"},
+    "R8": {"B2a_random_residual_selection": true, "B2b_random_validation_selection": true, "B3_search_ignores_trigger": true, "pass": true, "same_program_sampler": true}
+  },
+  "instrument_valid": false,
+  "iteration": 2,
+  "n_instrument": 32,
+  "n_noise": 200,
+  "workflow_run": 38140016343,
+  "note": "Iteration 2 repaired corrupt_rank, but corrupt_circular still showed a small systematic negative oracle-gain CI. Iteration 3 uses large circular shifts for both corruption families and validation-gates the oracle extension coefficient including beta=0 to remove finite-sample null overfit; R2/R4 criteria remain unchanged and fresh DEV seeds are used."
+}
