@@ -14,7 +14,7 @@ class Program:
     def constants(self):return int(self.p is not None)+int(self.q is not None)
     def mdl_cost(self):return 1.0+MDL_CONSTANT_COST*self.constants()
 
-def replace(p,**kw):d=asdict(p);d.update(kw);return Program(**d)
+def replace(prog,**kw):d=asdict(prog);d.update(kw);return Program(**d)
 def lag(x,k=1):x=np.asarray(x,float);z=np.empty_like(x);z[:k]=x[0];z[k:]=x[:-k];return z
 def movmean_discrete(x,w):
     x=np.asarray(x,float);o=np.empty_like(x);cs=np.cumsum(np.r_[0.,x])
