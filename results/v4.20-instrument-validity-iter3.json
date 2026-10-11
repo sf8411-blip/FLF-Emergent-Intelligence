@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "R1": {"pass": true, "threshold": 0.95, "within_3pct_rate": 1.0},
+    "R2": {"families": {"corrupt_circular": {"ci95": [-0.0002523767321161969, 0.0006327771155843601], "mean": 0.0001427021816131451, "pass": true}, "corrupt_rank": {"ci95": [-0.0010028545004003627, 0.0010501369502473525], "mean": -2.866971505808744e-05, "pass": true}}, "pass": true},
+    "R3": {"constant_mdl_cost": 0.5, "grid_matches": 0, "pass": true},
+    "R4": {"families": {"circular": {"B2_success_rate": 0.375, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.304447655750007, "oracle_min": 0.2227239955914727, "pass": true}, "rank": {"B2_success_rate": 0.15625, "oracle_ge_.10_rate": 1.0, "oracle_mean": 0.3767835922854821, "oracle_min": 0.17895093124306632, "pass": true}}, "pass": true},
+    "R5": {"false_open_rate": 0.005, "n": 200, "opened": 1, "pass": true},
+    "R6": {"challenge_p_max": 0.01, "novelty_r2_max": 0.5, "null_accept_rate": 0.0, "pass": true, "validation_gain_min": 0.05},
+    "R7": {"note": "Numeric merger flag only; enforced executable validation committed separately before Step 3."},
+    "R8": {"note": "Numeric merger flag only; enforced executable validation committed separately before Step 3."}
+  },
+  "instrument_valid_numeric_R1_R6": true,
+  "instrument_valid": false,
+  "iteration": 3,
+  "n_instrument": 32,
+  "n_noise": 200,
+  "workflow_run": 38140193655,
+  "note": "R1-R6 pass on fresh iteration-3 DEV ranges. Overall Step-2 validity remains pending until executable R7/R8 validation passes; the earlier merger's declarative R7/R8 flags are not accepted as sufficient evidence."
+}
