@@ -1,0 +1,87 @@
+name: v419-t1-repaired-preT2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v4.19-wip]
+    paths:
+      - .github/workflows/v419-t1-repaired.yml
+
+permissions:
+  contents: read
+
+env:
+  V419_PREREG_BLOB_SHA: 7257507566b7c15261fdf8a1aba705ec7cde7e63
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Full regression suite including unchanged v4.18 tests
+        run: python -m unittest discover -s tests -v
+
+  pilot:
+    needs: regression
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Verify committed G10 gate artifact
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib,sys
+          root=pathlib.Path('.')
+          prereg=hashlib.sha256((root/'docs/v4.19_preregistration.md').read_bytes()).hexdigest()
+          d=json.loads((root/'results/v4.19-reachability.json').read_text())
+          if not d.get('pass') or d.get('preregistration_sha256') != prereg:
+              print(json.dumps(d,indent=2));sys.exit(2)
+          PY
+      - name: T1 repaired development pilot — exact preregistered budget
+        run: |
+          python run_v419.py \
+            --tier T1 \
+            --shard "${{ matrix.shard }}/4" \
+            --out "results/v4.19-t1-repaired-shard-${{ matrix.shard }}.jsonl" \
+            --code-sha "$GITHUB_SHA"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v419-t1-repaired-${{ matrix.shard }}
+          path: results/v4.19-t1-repaired-shard-${{ matrix.shard }}.jsonl
+          if-no-files-found: warn
+
+  merge:
+    needs: pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: v419-t1-repaired-*
+          path: pilot-parts
+          merge-multiple: true
+      - name: Merge repaired T1 without inferential verdict
+        run: |
+          python merge_v419_pilot.py pilot-parts/*.jsonl --out results/v4.19-t1-repaired-summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v419-t1-repaired-summary
+          path: results/v4.19-t1-repaired-summary.json
