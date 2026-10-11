@@ -29,6 +29,10 @@ def pairwise_abs_corr(signatures):
 def predictive_substitutability(contrib_a,contrib_b):
     return abs(v.corr(np.asarray(contrib_a,float),np.asarray(contrib_b,float)))
 
+def program_signature(p):
+    """Stable structural identity that never formats absent constants."""
+    return (p.kind,p.a,p.b,None if p.p is None else float(p.p),None if p.q is None else float(p.q))
+
 def control_candidates(env,base,seed,trigger_open=False,count=v.B2_CANDIDATES):
     """R8 controls: B2a/B2b share the same random bank; B3 always searches."""
     bank,res=v.candidate_bank(env,base,seed,count=count,guided=False,shuffle=False)
@@ -42,4 +46,4 @@ def control_candidates(env,base,seed,trigger_open=False,count=v.B2_CANDIDATES):
     b2a=choose('B2a');b2b=choose('B2b')
     # Deliberately ignore trigger_open: B3 is an equal-budget search control.
     b3=v.select_candidate(env,np.asarray(base['_y']),base,seed+1,'shuffled',count=count)
-    return {'B2a':b2a,'B2b':b2b,'B3':b3,'b3_ran':True,'trigger_open_input':bool(trigger_open),'bank_text':[p.text() for p,_ in bank]}
+    return {'B2a':b2a,'B2b':b2b,'B3':b3,'b3_ran':True,'trigger_open_input':bool(trigger_open),'bank_signature':[program_signature(p) for p,_ in bank]}
