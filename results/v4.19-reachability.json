@@ -1,0 +1,63 @@
+{
+  "preregistration_sha256": "ed22321d6af2664201146a017a35cb7ff035229b48032eae25e98d175a5530f5",
+  "preregistration_git_blob_sha": "7257507566b7c15261fdf8a1aba705ec7cde7e63",
+  "code_commit_shas": [
+    "8347cc64e6b251900559789ea16485dced971f17"
+  ],
+  "diagnostic_count": 12,
+  "families": [
+    {
+      "family": "circular",
+      "diagnostic_seeds": [8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011],
+      "operator_support": ["x0"],
+      "max_depth_exhaustive": 3,
+      "max_nodes": 11,
+      "unique_functions_through_depth2": [1,22,1096],
+      "generated_ast_candidates_through_depth2": 2540,
+      "depth3_unary_candidates_tested": 22980,
+      "depth3_binary_ast_candidates_tested": 4063334,
+      "depth3_best_unary_nrmse": 0.5935247573202577,
+      "depth3_best_root_r2": {
+        "add": 0.759705199814068,
+        "subtract": 0.759705199814068,
+        "product": 0.6953259719743349,
+        "interaction_value_depth2": 0.6953259719743347,
+        "interaction_mask_depth2": 0.6953259719743347
+      },
+      "depth_le3_equivalent_found": null,
+      "reference_depth": 4,
+      "reference_nodes": 11,
+      "reference_nrmse": 4.453560714911757e-16,
+      "l0_nrmse": 0.9867332146833443,
+      "audit_method": "functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3",
+      "pass": true
+    },
+    {
+      "family": "rank_interaction",
+      "diagnostic_seeds": [8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011],
+      "operator_support": ["x0","x1"],
+      "max_depth_exhaustive": 3,
+      "max_nodes": 11,
+      "unique_functions_through_depth2": [2,55,5807],
+      "generated_ast_candidates_through_depth2": 14074,
+      "depth3_unary_candidates_tested": 124852,
+      "depth3_binary_ast_candidates_tested": 94013991,
+      "depth3_best_unary_nrmse": 0.7680320864537088,
+      "depth3_best_root_r2": {
+        "add": 0.3675215547482267,
+        "subtract": 0.5663265198952083,
+        "product": 0.8767874362433734,
+        "interaction_value_depth2": 0.8767874362433734,
+        "interaction_mask_depth2": 0.8767874362433734
+      },
+      "depth_le3_equivalent_found": null,
+      "reference_depth": 4,
+      "reference_nodes": 8,
+      "reference_nrmse": 4.3955544564333655e-16,
+      "l0_nrmse": 0.7668792349359744,
+      "audit_method": "functional-DP through depth2 + exhaustive vectorized meet-in-the-middle root audit at depth3",
+      "pass": true
+    }
+  ],
+  "pass": true
+}
