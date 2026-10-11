@@ -20,8 +20,9 @@ class V420EvalTests(unittest.TestCase):
         env,y,h,_=v.make_world('circular',191001);base=v.b0_and_oracle(env,y,h);base['_y']=y
         a=e.control_candidates(env,base,551,trigger_open=False,count=8)
         b=e.control_candidates(env,base,551,trigger_open=True,count=8)
-        self.assertEqual(a['bank_text'],b['bank_text'])
+        self.assertEqual(a['bank_signature'],b['bank_signature'])
         self.assertTrue(a['b3_ran']);self.assertFalse(a['trigger_open_input'])
-        self.assertIn(a['B2a'][1].text(),a['bank_text']);self.assertIn(a['B2b'][1].text(),a['bank_text'])
+        self.assertIn(e.program_signature(a['B2a'][1]),a['bank_signature'])
+        self.assertIn(e.program_signature(a['B2b'][1]),a['bank_signature'])
 
 if __name__=='__main__':unittest.main()
