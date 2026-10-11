@@ -39,20 +39,62 @@ def apply_fit(exprs:list[Expr], fit:Fit, env:dict[str,np.ndarray], target:np.nda
 
 
 def _acf1(x:np.ndarray)->float:
-    x=x-np.mean(x)
-    if len(x)<3 or np.std(x)<1e-12:return 0.0
-    return float(np.corrcoef(x[:-1],x[1:])[0,1])
+    x=np.asarray(x,float)-np.mean(x)
+    if len(x)<4 or np.std(x)<1e-12:return 0.0
+    z=float(np.corrcoef(x[:-1],x[1:])[0,1])
+    return z if np.isfinite(z) else 0.0
 
 
-def trigger_components(residual:np.ndarray, actions:np.ndarray, base_dl:float) -> tuple[float,float,float,float]:
-    n=len(residual); r=np.asarray(residual,float)
-    ac=abs(_acf1(r))*math.sqrt(max(n,1))
-    slopes=[]
-    for j in range(actions.shape[1]):
-        a=actions[:,j];slopes.append(abs(float(np.corrcoef(a,r)[0,1])) if np.std(a)>1e-12 and np.std(r)>1e-12 else 0.0)
-    inc=max(slopes,default=0.0)*math.sqrt(max(n,1))
-    sign_changes=np.mean(np.sign(r[1:])!=np.sign(r[:-1])) if n>1 else .5
-    comp=max(0.0,(0.5-sign_changes)/math.sqrt(0.25/max(n-1,1)))
+def _fisher_abs_z(a:np.ndarray,b:np.ndarray)->float:
+    """Approximate absolute z score for linear dependence under rho=0."""
+    a=np.asarray(a,float);b=np.asarray(b,float);n=min(len(a),len(b))
+    if n<5 or np.std(a[:n])<1e-12 or np.std(b[:n])<1e-12:return 0.0
+    rho=float(np.corrcoef(a[:n],b[:n])[0,1])
+    if not np.isfinite(rho):return 0.0
+    rho=float(np.clip(rho,-.999999,.999999))
+    return abs(float(np.arctanh(rho)))*math.sqrt(max(n-3,1))
+
+
+def _compression_gap_z(residual:np.ndarray)->float:
+    """Likelihood-ratio z-like score for compressible sign-transition structure.
+
+    This uses only the learner's own residual sequence.  Under an iid-sign null,
+    the 2x2 transition likelihood-ratio statistic is asymptotically chi-square(1);
+    sqrt(G^2) is therefore an absolute z-like compression-gap statistic.  It is
+    distinct from the linear lag-1 autocorrelation statistic and requires no
+    benchmark/world metadata.
+    """
+    r=np.asarray(residual,float)
+    if len(r)<8 or np.std(r)<1e-12:return 0.0
+    bits=(r>=np.median(r)).astype(int)
+    table=np.zeros((2,2),float)
+    for a,b in zip(bits[:-1],bits[1:]):table[a,b]+=1.0
+    n=float(table.sum())
+    if n<=0:return 0.0
+    rs=table.sum(1);cs=table.sum(0);g2=0.0
+    for i in range(2):
+        for j in range(2):
+            exp=rs[i]*cs[j]/n
+            obs=table[i,j]
+            if obs>0 and exp>0:g2+=2.0*obs*math.log(obs/exp)
+    return math.sqrt(max(g2,0.0))
+
+
+def trigger_components(residual:np.ndarray, actions:np.ndarray, base_dl:float=0.0) -> tuple[float,float,float,float]:
+    """Preregistered residual trigger.
+
+    score = z(residual_autocorrelation)
+          + z(intervention_effect_inconsistency)
+          + z(compression_gap)
+
+    All three components are computed exclusively from learner-visible residuals
+    and actions. ``base_dl`` is retained for API compatibility; no oracle or
+    generator quantity is used.
+    """
+    r=np.asarray(residual,float);n=len(r)
+    ac=_fisher_abs_z(r[:-1],r[1:]) if n>=5 else 0.0
+    inc=max((_fisher_abs_z(np.asarray(actions)[:,j],r) for j in range(actions.shape[1])),default=0.0)
+    comp=_compression_gap_z(r)
     score=ac+inc+comp
     return score,ac,inc,comp
 
