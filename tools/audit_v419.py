@@ -3,10 +3,11 @@ from __future__ import annotations
 import argparse, inspect, json, pathlib, sys
 import numpy as np
 ROOT=pathlib.Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
-from flf_ecf.v419_worlds import make_world, hidden_feature
-from flf_ecf.v419_dsl import Expr, var, evaluate, l0_expressions, reference_expr, mdl_cost
-from flf_ecf.v419_learner import trigger_components, random_proposal, evaluate_residual_episode
-from flf_ecf.v419_v418_adapter import fit_v418_l0, select_three
+from flf_ecf.v419_worlds import make_world, hidden_feature, reference_expr
+from flf_ecf.v419_dsl import Expr, var, evaluate, l0_expressions, mdl_cost
+from flf_ecf.v419_learner import trigger_components, random_proposal
+from flf_ecf.v419_v418_adapter import select_three
+import flf_ecf.v419_runner as v419_runner
 TRIGGER_THRESHOLD=2.5
 
 def corr(a,b):
@@ -76,13 +77,13 @@ def main():
  for r in by['null']:
   if r.get('accepted') and r.get('operator'):
    w=world('null',r['seed']);e=parse_expr(r['operator']);rs.append(r2_l0(e,augment(w)));ops.append(r['operator'])
- nullmin=min(float(r['trigger_score']) for r in by['null']);ss=inspect.getsource(select_three);ls=inspect.getsource(evaluate_residual_episode)
- d={'accepted':len(rs),'l0_r2_median':float(np.median(rs)) if rs else None,'trigger_min':nullmin,'example':ops[0] if ops else None,'three_slot_selector':'need=3-len(req)' in ss.replace(' ',''),'novelty_gate_present':'novel' in ls.lower()}
+ nullmin=min(float(r['trigger_score']) for r in by['null']);ss=inspect.getsource(select_three);accept_src=inspect.getsource(v419_runner._candidate_accept)
+ d={'accepted':len(rs),'l0_r2_median':float(np.median(rs)) if rs else None,'trigger_min':nullmin,'example':ops[0] if ops else None,'three_slot_selector':'need=3-len(req)' in ss.replace(' ',''),'novelty_gate_present':'novel' in accept_src.lower() or 'r2' in accept_src.lower()}
  C['b']={'status':'REPRODUCED' if len(rs)==14 and np.median(rs)>=.99 and nullmin>=9 and d['three_slot_selector'] and not d['novelty_gate_present'] else 'NOT REPRODUCED','diagnostics':d}
  # c
  nop=sum(float(r['trigger_score'])>=2.5 for r in by['noise']);rng=np.random.default_rng(44001);opens=0;n=406
  for _ in range(a.noise_sims):
-  rr=rng.normal(size=n);uu=rng.normal(size=(n,2));opens+=sum(trigger_components(rr,uu))>=2.5
+  rr=rng.normal(size=n);uu=rng.normal(size=(n,2));opens+=trigger_components(rr,uu)[0]>=2.5
  pp=opens/a.noise_sims;d={'threshold':2.5,'sim_iid_open_rate':pp,'noise_open_count':nop,'noise_n':len(by['noise'])}
  C['c']={'status':'REPRODUCED' if nop==12 and approx(pp,.51,.08) else 'NOT REPRODUCED','diagnostics':d}
  # d
@@ -106,7 +107,7 @@ def main():
  rk=by['rank_interaction'];og=[(r['b0_error']-r['b1_error'])/max(r['b0_error'],1e-12) for r in rk];gg=[float(r['gap_closed']) for r in rk];im=int(np.argmax(gg));pool=sum(r['b0_error']-r['l1_error'] for r in rk)/max(sum(r['b0_error']-r['b1_error'] for r in rk),1e-12)
  d={'negative_oracle_gain_count':sum(x<0 for x in og),'mean_gap':float(np.mean(gg)),'max_gap_seed':rk[im]['seed'],'max_gap':gg[im],'max_gap_oracle_gain':og[im],'pooled_ratio':float(pool)}
  C['g']={'status':'REPRODUCED' if sum(x<0 for x in og)==4 and approx(np.mean(gg),.34,.03) and approx(og[im],.008,.02) and approx(gg[im],7.77,1.0) and approx(pool,.048,.03) else 'NOT REPRODUCED','diagnostics':d}
- # h: require exact archived pilot bytes, otherwise conservative failure
+ # h
  p=ROOT/'results/v4.19-t1-summary.json'
  if p.exists():
   j=json.loads(p.read_text());f=j['families'];nu=f['null']['acceptance_rate'];ra=f['rank_interaction']['acceptance_rate'];rr=f['rank_interaction']['mean_random_gap_closed'];gu=f['rank_interaction']['mean_gap_closed'];ok=approx(nu,.5,.02) and approx(ra,.2,.02) and rr>gu;d={'null_acceptance':nu,'rank_acceptance':ra,'random_gap':rr,'guided_gap':gu}
