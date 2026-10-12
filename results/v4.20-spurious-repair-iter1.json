@@ -1,0 +1,16 @@
+{
+  "block_ge_acf": false,
+  "budget_all_512": true,
+  "chosen_first_30_count": 19,
+  "chosen_seed_max": 527297,
+  "chosen_seed_min": 527003,
+  "cp95_upper_one_sided": 0.22637424927237798,
+  "false_pass_rate": 0.05263157894736842,
+  "false_passes": 1,
+  "iteration": 1,
+  "pass": false,
+  "searched_seeds": 300,
+  "total_prechallenge": 19,
+  "workflow_run": 38318858965,
+  "diagnostic": "R-C failed: fewer than 30 prechallenge positives were found, one false pass occurred, and at least one challenge had acf_length 190 > block_length 165. Criterion unchanged."
+}
