@@ -1,0 +1,75 @@
+name: v420-repair-iter1
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'src/flf_ecf/v420_repair_iter1.py'
+      - 'tools/use_v420_iter1.py'
+      - '.github/workflows/v420-repair-iter1.yml'
+env:
+  PYTHONHASHSEED: '0'
+jobs:
+  g10:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {family: circular, seed: 520010}
+          - {family: rank, seed: 520011}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: check
+        continue-on-error: true
+        run: python tools/use_v420_iter1.py tools/check_v420_g10.py --family ${{ matrix.family }} --seed ${{ matrix.seed }} --out results/g10-${{ matrix.family }}-iter1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-g10-${{ matrix.family }}-iter1
+          path: results/g10-${{ matrix.family }}-iter1.json
+      - if: steps.check.outcome != 'success'
+        run: exit 2
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: check
+        continue-on-error: true
+        run: python tools/use_v420_iter1.py tools/check_v420_core_repair.py --iteration 1 --checkpoint results/checkpoints/v4.20-core-iter1.jsonl --out results/v4.20-core-iter1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-core-iter1
+          path: |
+            results/v4.20-core-iter1.json
+            results/checkpoints/v4.20-core-iter1.jsonl
+      - if: steps.check.outcome != 'success'
+        run: exit 2
+  spurious:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: check
+        continue-on-error: true
+        run: python tools/use_v420_iter1.py tools/check_v420_spurious.py --iteration 1 --checkpoint results/checkpoints/v4.20-spurious-iter1.jsonl --out results/v4.20-spurious-iter1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-spurious-iter1
+          path: |
+            results/v4.20-spurious-iter1.json
+            results/checkpoints/v4.20-spurious-iter1.jsonl
+      - if: steps.check.outcome != 'success'
+        run: exit 2
