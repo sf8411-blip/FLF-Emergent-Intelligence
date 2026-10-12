@@ -1,0 +1,14 @@
+{
+  "iteration": 2,
+  "seed_base": 540000,
+  "R2": {
+    "corrupt_circular": {"mean": 0.0, "ci95": [0.0, 0.0], "pass": true},
+    "corrupt_rank": {"mean": 0.0, "ci95": [0.0, 0.0], "pass": true}
+  },
+  "R3": {"continuous_1d_search": true, "old_grid_exact_matches": 0, "constant_charge": 0.5, "mdl_formula_ok": true, "pass": true},
+  "R-B": {"pass": true, "note": "All seven families used the same non-gating run_seed_core path and all four search arms ran on each smoke row."},
+  "R-D": {"n": 64, "rate_rmse_le_1.10_noise_sd": 0.96875, "median_rmse": 0.08086834536409099, "threshold": 0.088, "pass": true},
+  "pass": true,
+  "workflow_run": 38319257682,
+  "note": "Core instruments pass. Overall repair iteration 2 is still FAIL because independent R4 Rank failed."
+}
