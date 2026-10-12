@@ -1,0 +1,29 @@
+{
+  "iteration": 2,
+  "search_budget": 1024,
+  "families": {
+    "circular": {
+      "n": 32,
+      "b2_success_rate": 0.59375,
+      "oracle_ge_.10_rate": 1.0,
+      "oracle_gain_min": 0.19742534122241806,
+      "pass": true
+    },
+    "rank": {
+      "n": 32,
+      "b2_success_rate": 0.21875,
+      "oracle_ge_.10_rate": 0.84375,
+      "oracle_gain_min": -0.01099285267541214,
+      "pass": false
+    }
+  },
+  "R-F": {
+    "n": 64,
+    "same_program_rate": 0.40625,
+    "report_as_one_control": false,
+    "pass": true
+  },
+  "pass": false,
+  "workflow_run": 38319257682,
+  "note": "Independent merge of all eight Actions R4 batch artifacts. Iteration 2 fails fixed R4 because Rank oracle>=0.10 rate is 27/32=0.84375. Thresholds unchanged."
+}
