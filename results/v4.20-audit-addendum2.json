@@ -1,0 +1,59 @@
+{
+  "C1": {
+    "families": {
+      "circular": {"n": 40, "opens": 0},
+      "corrupt_circular": {"n": 40, "opens": 0},
+      "corrupt_rank": {"n": 40, "opens": 0},
+      "noise": {"n": 40, "opens": 0},
+      "null": {"n": 40, "opens": 0},
+      "rank": {"n": 40, "opens": 0}
+    },
+    "median_abs_hidden_lag1_acf": 0.06748316078746101
+  },
+  "C2": {
+    "crash_path": {"crashed": 19, "errors": {"TypeError": 19}, "n": 24},
+    "note": "run_seed itself was not called because it hardcodes prohibited dress seed bases; the identical serializer path was exercised on non-dress worlds.",
+    "program_text": {"diff": "TypeError", "mean": "TypeError", "moddiff": "TypeError", "modraw": "TypeError", "prod": "TypeError", "rankprod": "OK"}
+  },
+  "C3": {
+    "generator_noise_sd": 0.08,
+    "null_b0_test_rmse_median": 0.08391933392235837,
+    "r1_same_feature_ceiling": {
+      "circular": {"median_relative_gap": -0.0008748436985145697, "within_3pct_rate": 1.0},
+      "null": {"median_relative_gap": -0.0000619001461517294, "within_3pct_rate": 1.0},
+      "rank": {"median_relative_gap": -0.00019077123374278734, "within_3pct_rate": 1.0}
+    },
+    "rmse_over_noise_sd": 1.0489916740294796
+  },
+  "C4": {
+    "accepted": 9,
+    "accepted_and_right_template": 9,
+    "bypass_n": 36,
+    "candidate_budget": 25,
+    "circular_period_median_relative_error": 0.3632367755608407,
+    "oracle_feature_max_abs_diff": {"circular": 0.0, "rank": 0.0},
+    "right_hidden_template_drawn": 24,
+    "sample_program_kinds": 6
+  },
+  "C5": {"decisions": 256, "stages": {"challenge": 0, "gain": 256, "novelty": 0}},
+  "C6": {
+    "b2a": 0.29452547813027063,
+    "b2b": 0.2943008407392102,
+    "dress_subsample_reps": 300,
+    "guided": 0.3547554218554061,
+    "h1_gap_gate_power": 0.19666666666666666,
+    "h2_vs_b2a_gate_power": 0.0,
+    "h2_vs_b2b_gate_power": 0.0,
+    "same_program": 40
+  },
+  "baseline_commit": "8ed59aade32eebbc8342f53c482ad304a16f3775",
+  "seeds": "non-dress only: 410000-419999",
+  "strict_verdicts": {
+    "C1": "REPRODUCED",
+    "C2": "NOT REPRODUCED",
+    "C3": "REPRODUCED",
+    "C4": "NOT REPRODUCED",
+    "C5": "NOT REPRODUCED",
+    "C6": "NOT REPRODUCED"
+  }
+}
