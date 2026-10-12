@@ -3,7 +3,13 @@ from __future__ import annotations
 import pathlib,runpy,sys
 ROOT=pathlib.Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 import flf_ecf
+from flf_ecf import v420_repair as r0
 from flf_ecf import v420_repair_iter1 as r1
+# Star imports intentionally omit private helpers. G10 uses these grammar
+# validators directly, so expose the exact iteration-0 grammar helpers without
+# changing any scientific definition.
+for name in ('_valid_unary','_valid_binary','_init_param'):
+    setattr(r1,name,getattr(r0,name))
 sys.modules['flf_ecf.v420_repair']=r1
 flf_ecf.v420_repair=r1
 if len(sys.argv)<2:raise SystemExit('usage: use_v420_iter1.py SCRIPT [args...]')
