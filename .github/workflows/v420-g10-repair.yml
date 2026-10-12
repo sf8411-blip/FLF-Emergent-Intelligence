@@ -1,0 +1,38 @@
+name: v420-g10-repair
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'tools/check_v420_g10.py'
+      - '.github/workflows/v420-g10-repair.yml'
+jobs:
+  g10:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: circular
+            seed: 500010
+          - family: rank
+            seed: 500011
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Run exhaustive depth<=3 G10 screen
+        id: g10
+        continue-on-error: true
+        run: python tools/check_v420_g10.py --family ${{ matrix.family }} --seed ${{ matrix.seed }} --out results/g10-${{ matrix.family }}-iter0.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-g10-${{ matrix.family }}-iter0
+          path: results/g10-${{ matrix.family }}-iter0.json
+      - if: steps.g10.outcome != 'success'
+        run: exit 2
