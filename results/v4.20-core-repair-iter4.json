@@ -1,0 +1,31 @@
+{
+  "iteration": 4,
+  "seed_base": 580000,
+  "R2": {
+    "corrupt_circular": {"mean": 0.0, "ci95": [0.0, 0.0], "pass": true},
+    "corrupt_rank": {"mean": 0.0, "ci95": [0.0, 0.0], "pass": true}
+  },
+  "R3": {
+    "continuous_1d_search": true,
+    "old_grid_exact_matches": 0,
+    "constant_charge": 0.5,
+    "mdl_formula_ok": true,
+    "pass": true
+  },
+  "R-B": {
+    "pass": true,
+    "note": "All seven families used the same non-gating run_seed_core path; all four search arms ran on each smoke row."
+  },
+  "R-D": {
+    "n": 64,
+    "rate_rmse_le_1.10_noise_sd": 0.921875,
+    "passed_seeds": 59,
+    "median_rmse": 0.08234121104381029,
+    "threshold": 0.088,
+    "pass": false
+  },
+  "pass": false,
+  "workflow_run": 38320218609,
+  "verdict": "INSTRUMENT_INVALID",
+  "note": "Final allowed repair iteration. R-D failed the fixed >=0.95 requirement (59/64=0.921875). No further repair iteration is allowed. T0, Amendment A1, and the dress are forbidden after this result."
+}
