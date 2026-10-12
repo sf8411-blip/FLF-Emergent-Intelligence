@@ -1,0 +1,138 @@
+name: v420-repair-iter3
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'src/flf_ecf/v420_repair_iter3.py'
+      - 'tools/use_v420_iter3.py'
+      - 'tools/v420_repair_generic.py'
+      - 'tools/merge_v420_repair_generic.py'
+      - '.github/workflows/v420-repair-iter3.yml'
+env:
+  PYTHONHASHSEED: '0'
+jobs:
+  g10:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {family: circular, seed: 560010}
+          - {family: rank, seed: 560011}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: g10
+        continue-on-error: true
+        run: python tools/use_v420_iter3.py tools/check_v420_g10.py --family ${{ matrix.family }} --seed ${{ matrix.seed }} --out results/g10-${{ matrix.family }}-iter3.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g10-${{ matrix.family }}-iter3
+          path: results/g10-${{ matrix.family }}-iter3.json
+      - if: steps.g10.outcome != 'success'
+        run: exit 2
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: core
+        continue-on-error: true
+        run: python tools/use_v420_iter3.py tools/v420_repair_generic.py core --iteration 3 --base 560000 --out results/v4.20-core-iter3.json --checkpoint results/checkpoints/v4.20-core-iter3.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-iter3
+          path: |
+            results/v4.20-core-iter3.json
+            results/checkpoints/v4.20-core-iter3.jsonl
+      - if: steps.core.outcome != 'success'
+        run: exit 2
+  r4:
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [circular, rank]
+        batch: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - run: python tools/use_v420_iter3.py tools/v420_repair_generic.py r4 --iteration 3 --base 560000 --family ${{ matrix.family }} --batch ${{ matrix.batch }} --out results/r4-${{ matrix.family }}-${{ matrix.batch }}.jsonl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r4-${{ matrix.family }}-${{ matrix.batch }}-iter3
+          path: results/r4-${{ matrix.family }}-${{ matrix.batch }}.jsonl
+  r4merge:
+    needs: r4
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r4-*-iter3
+          path: downloaded
+      - id: merge
+        continue-on-error: true
+        run: python tools/merge_v420_repair_generic.py r4 --iteration 3 --budget 1024 --root downloaded --out results/v4.20-r4-iter3.json --checkpoint results/checkpoints/v4.20-r4-iter3.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r4-merged-iter3
+          path: |
+            results/v4.20-r4-iter3.json
+            results/checkpoints/v4.20-r4-iter3.jsonl
+      - if: steps.merge.outcome != 'success'
+        run: exit 2
+  spurious:
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - run: python tools/use_v420_iter3.py tools/v420_repair_generic.py spurious --iteration 3 --base 560000 --batch ${{ matrix.batch }} --out results/spurious-${{ matrix.batch }}.jsonl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spurious-${{ matrix.batch }}-iter3
+          path: results/spurious-${{ matrix.batch }}.jsonl
+  spuriousmerge:
+    needs: spurious
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: spurious-*-iter3
+          path: downloaded
+      - id: merge
+        continue-on-error: true
+        run: python tools/merge_v420_repair_generic.py spurious --iteration 3 --budget 1024 --root downloaded --out results/v4.20-spurious-iter3.json --checkpoint results/checkpoints/v4.20-spurious-iter3.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spurious-merged-iter3
+          path: |
+            results/v4.20-spurious-iter3.json
+            results/checkpoints/v4.20-spurious-iter3.jsonl
+      - if: steps.merge.outcome != 'success'
+        run: exit 2
