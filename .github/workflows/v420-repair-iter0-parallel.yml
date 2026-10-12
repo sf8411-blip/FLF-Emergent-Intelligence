@@ -1,0 +1,51 @@
+name: v420-repair-iter0-parallel
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'tools/check_v420_core_repair.py'
+      - 'tools/check_v420_spurious.py'
+      - '.github/workflows/v420-repair-iter0-parallel.yml'
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env: {PYTHONHASHSEED: '0'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: check
+        continue-on-error: true
+        run: python tools/check_v420_core_repair.py --iteration 0 --checkpoint results/checkpoints/v4.20-core-iter0.jsonl --out results/v4.20-core-iter0.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-core-iter0
+          path: |
+            results/v4.20-core-iter0.json
+            results/checkpoints/v4.20-core-iter0.jsonl
+      - if: steps.check.outcome != 'success'
+        run: exit 2
+  spurious:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env: {PYTHONHASHSEED: '0'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - id: check
+        continue-on-error: true
+        run: python tools/check_v420_spurious.py --iteration 0 --checkpoint results/checkpoints/v4.20-spurious-iter0.jsonl --out results/v4.20-spurious-iter0.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-spurious-iter0
+          path: |
+            results/v4.20-spurious-iter0.json
+            results/checkpoints/v4.20-spurious-iter0.jsonl
+      - if: steps.check.outcome != 'success'
+        run: exit 2
