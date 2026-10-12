@@ -1,0 +1,35 @@
+name: v420-repair-validity
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'src/flf_ecf/v420_repair.py'
+      - 'src/flf_ecf/v420_dress.py'
+      - 'tools/validate_v420_repair.py'
+      - '.github/workflows/v420-repair-validity.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Validate R-A through R-F iteration 0
+        id: validate
+        continue-on-error: true
+        run: python tools/validate_v420_repair.py --iteration 0 --checkpoint results/checkpoints/v4.20-repair-iter0.jsonl --out results/v4.20-repair-validity-iter0.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-repair-validity-iter0
+          path: |
+            results/v4.20-repair-validity-iter0.json
+            results/checkpoints/v4.20-repair-iter0.jsonl
+      - name: Enforce validator outcome
+        if: steps.validate.outcome != 'success'
+        run: exit 2
