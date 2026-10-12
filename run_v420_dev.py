@@ -5,6 +5,7 @@ import numpy as np
 ROOT=pathlib.Path(__file__).resolve().parent;sys.path.insert(0,str(ROOT/'src'))
 import flf_ecf.v420_dev as v
 
+
 def enc(o):
     if hasattr(o,'item'):return o.item()
     raise TypeError(type(o).__name__)
@@ -52,5 +53,25 @@ if a.iteration>=3:
         o=dict(raw);o['beta']=scale*beta;o['pred']=pp;o['val_rmse']=v.rmse(y[b['val']],pp[b['val']]);o['test_rmse']=v.rmse(y[b['te']],pp[b['te']]);o['validation_scale']=scale
         b['oracle']=o;b['b1_test_rmse']=o['test_rmse'];return b
     v.b0_and_oracle=_gated_oracle
+# Final allowed DEV iteration: satisfy R3 literally with bounded continuous 1-D
+# refinement (not a fixed constant grid), and validate R6's fresh-trace challenge
+# on the same latent world parameters at a different intervention amplitude.
+if a.iteration>=4:
+    from flf_ecf import v420_protocol as protocol
+    v.tune_constants=protocol.tune_constants_continuous
+    _instrument_seed=v.instrument_seed
+    def _final_instrument_seed(iteration,index):
+        row=_instrument_seed(iteration,index)
+        row['R3_constant_search']='continuous_1d_refinement'
+        b=120000+int(iteration)*10000;i=int(index)
+        for fam in ('circular','rank'):
+            env,y,h,meta=v.make_world(fam,b+11000+i)
+            prog=protocol.oracle_program(fam,meta)
+            pv,gain,meta2=protocol.challenge_same_world(prog,fam,meta,b+920000+i,B=999,action_scale=1.6)
+            row[f'R6_{fam}_positive_challenge_p']=pv
+            row[f'R6_{fam}_positive_challenge_gain']=gain
+            row[f'R6_{fam}_same_meta']=bool(meta==meta2)
+        return row
+    v.instrument_seed=_final_instrument_seed
 row=v.instrument_seed(a.iteration,a.index) if a.mode=='instrument' else v.noise_trigger_row(a.iteration,a.index)
 path=ROOT/a.out;path.parent.mkdir(parents=True,exist_ok=True);tmp=path.with_suffix(path.suffix+'.tmp');tmp.write_text(json.dumps(row,sort_keys=True,default=enc)+'\n');os.replace(tmp,path);print(json.dumps(row,indent=2,default=enc))
