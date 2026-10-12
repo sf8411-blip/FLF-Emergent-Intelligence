@@ -1,38 +1,44 @@
-import pathlib,sys,unittest
+import pathlib,sys,tempfile,json,subprocess,unittest
 import numpy as np
 ROOT=pathlib.Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
-from flf_ecf import v420_dev as v
 from flf_ecf import v420_dress as d
-from flf_ecf import v420_eval as ev
+from flf_ecf import v420_repair as r
 
-class V420DressTests(unittest.TestCase):
-    def test_dev_ranges_are_distinct_and_exactly_32(self):
+class V420DressRepairTests(unittest.TestCase):
+    def test_dress_ranges_are_seven_distinct_unseen_banks(self):
         sets=[set(range(b,b+32)) for b in d.SEED_BASE.values()]
-        self.assertEqual(len(sets),6)
+        self.assertEqual(len(sets),7)
         for i,a in enumerate(sets):
+            self.assertEqual(len(a),32)
             for b in sets[i+1:]:self.assertTrue(a.isdisjoint(b))
 
-    def test_corruption_preserves_y_marginal_but_breaks_alignment(self):
-        for fam,basefam,seed in [('corrupt_circular','circular',323000),('corrupt_rank','rank',324000)]:
-            env0,y0,h0,m0=v.make_world(basefam,seed)
-            env,y,h,m=d.make_dress_world(fam,seed)
+    def test_typed_grammar_has_no_hidden_template_and_text_is_safe(self):
+        self.assertTrue(set(r.FORBIDDEN_TEMPLATE_OPS).isdisjoint(r.PRIMITIVES))
+        rng=np.random.default_rng(7)
+        for _ in range(100):
+            e=r.random_expr(('x0','x1','u0','u1'),rng)
+            self.assertTrue(r.structure_is_clean(e));self.assertIsInstance(e.text(),str)
+
+    def test_actual_corruption_is_circular_shift_and_zero_oracle(self):
+        for fam,basefam,seed in [('corrupt_circular','circular',610001),('corrupt_rank','rank',610002)]:
+            e0,y0,h0,m0=r.make_world(basefam,seed);e,y,h,m=r.make_world(fam,seed)
             self.assertTrue(np.allclose(np.sort(y),np.sort(y0)))
-            self.assertTrue(np.allclose(h,0.0))
-            for k in m0:self.assertEqual(m[k],m0[k])
-            self.assertIn('shift',m)
+            self.assertTrue(np.allclose(h,0.0));self.assertEqual(m['corruption'],'circular_shift_y')
+            for k in m0:self.assertAlmostEqual(float(m[k]),float(m0[k]))
 
-    def test_fresh_corrupt_challenge_keeps_latent_meta(self):
-        env,y,h,m=d.make_dress_world('corrupt_circular',323001)
-        env2,y2,h2,m2=d._fresh_challenge_world('corrupt_circular',m,999001)
-        self.assertAlmostEqual(m['period'],m2['period'])
-        self.assertTrue(np.allclose(h2,0.0))
-        self.assertGreater(np.std(env2['u0']),1.2*np.std(env['u0']))
+    def test_run_seed_and_validator_share_non_gating_core(self):
+        seed=611001
+        row=d.run_seed('corrupt_circular',seed_override=seed,challenge_B=9,search_budget=3)
+        core=r.run_seed_core('corrupt_circular',seed,challenge_B=9,search_budget=3)
+        self.assertFalse(row['trigger_is_gate']);self.assertFalse(core['trigger_is_gate'])
+        self.assertAlmostEqual(row['trigger_observed'],core['trigger_observed'])
+        self.assertEqual(row['search_counts'],core['search_counts'])
+        self.assertEqual(row['guided_program'],core['guided']['program'])
 
-    def test_b2a_b2b_are_selected_from_one_random_bank(self):
-        env,y,h,m=v.make_world('null',322002);base=d._gated_base(env,y,h)
-        a,b,sigs=d._select_random_controls(env,y,base,777)
-        self.assertIn(ev.program_signature(a[0]),sigs)
-        self.assertIn(ev.program_signature(b[0]),sigs)
-        self.assertEqual(len(sigs),d.CANDIDATES)
+    def test_every_family_executes_all_search_arms_on_non_dress_smoke(self):
+        for j,f in enumerate(d.FAMILIES):
+            row=d.run_seed(f,seed_override=612000+j,challenge_B=9,search_budget=2)
+            self.assertFalse(row['trigger_is_gate'])
+            self.assertTrue(all(int(x)>0 for x in row['search_counts'].values()))
 
 if __name__=='__main__':unittest.main()
