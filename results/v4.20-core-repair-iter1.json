@@ -1,0 +1,11 @@
+{
+  "R-B": {"pass": true, "rows": [{"family":"circular","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"rank","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"null","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"corrupt_circular","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"corrupt_rank","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"noise","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":false},{"family":"spurious","search_counts":{"b2a":8,"b2b":8,"b3":8,"guided":8},"trigger_is_gate":false,"trigger_open":true}]},
+  "R-D": {"median_rmse":0.08143774603066567,"n":64,"pass":true,"rate_rmse_le_1.10_noise_sd":0.953125,"threshold":0.088},
+  "R-F": {"n":64,"pass":true,"report_as_one_control":false,"same_program_rate":0.265625},
+  "R2": {"corrupt_circular":{"ci95":[0.0,0.0],"mean":0.0,"pass":true},"corrupt_rank":{"ci95":[0.0,0.0],"mean":0.0,"pass":true}},
+  "R3": {"constant_charge":0.5,"continuous_1d_search":true,"mdl_formula_ok":true,"old_grid_exact_matches":0,"pass":true},
+  "R4": {"circular":{"b2_success_rate":0.25,"candidate_eval_max":512,"candidate_eval_min":512,"oracle_gain_min":0.23326439250323225,"oracle_ge_.10_rate":1.0,"pass":true},"rank":{"b2_success_rate":0.09375,"candidate_eval_max":512,"candidate_eval_min":512,"oracle_gain_min":0.07947223900012634,"oracle_ge_.10_rate":0.90625,"pass":false}},
+  "iteration":1,"pass":false,"search_budget":512,"seed_base":520000,
+  "workflow_run":38318452865,
+  "note":"Archived failed scientific iteration-1 core evidence. R-D repaired and passed; R4 Rank remained below fixed criteria. Thresholds unchanged."
+}
