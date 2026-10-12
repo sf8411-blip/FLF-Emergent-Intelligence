@@ -1,0 +1,53 @@
+name: v420-r4-iter1-parallel
+on:
+  push:
+    branches: [v4.20-wip]
+    paths:
+      - 'tools/run_v420_r4_batch_iter1.py'
+      - 'tools/merge_v420_r4_iter1.py'
+      - '.github/workflows/v420-r4-iter1-parallel.yml'
+env:
+  PYTHONHASHSEED: '0'
+jobs:
+  batch:
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [circular, rank]
+        batch: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - run: python tools/run_v420_r4_batch_iter1.py --family ${{ matrix.family }} --batch ${{ matrix.batch }} --out results/r4-${{ matrix.family }}-${{ matrix.batch }}.jsonl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r4-${{ matrix.family }}-${{ matrix.batch }}
+          path: results/r4-${{ matrix.family }}-${{ matrix.batch }}.jsonl
+  merge:
+    needs: batch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r4-*
+          path: downloaded
+      - id: merge
+        continue-on-error: true
+        run: python tools/merge_v420_r4_iter1.py --root downloaded --checkpoint results/checkpoints/v4.20-r4-iter1.jsonl --out results/v4.20-r4-iter1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v420-r4-iter1-parallel
+          path: |
+            results/v4.20-r4-iter1.json
+            results/checkpoints/v4.20-r4-iter1.jsonl
+      - if: steps.merge.outcome != 'success'
+        run: exit 2
