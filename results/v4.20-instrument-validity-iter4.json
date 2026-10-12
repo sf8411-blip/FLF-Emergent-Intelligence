@@ -1,0 +1,98 @@
+{
+  "criteria": {
+    "R1": {
+      "pass": true,
+      "threshold": 0.95,
+      "within_3pct_rate": 1.0
+    },
+    "R2": {
+      "families": {
+        "corrupt_circular": {
+          "ci95": [
+            -0.0006963509885021997,
+            0.0001279299168436821
+          ],
+          "mean": -0.000259177365282238,
+          "pass": true
+        },
+        "corrupt_rank": {
+          "ci95": [
+            -0.00023789638262488414,
+            0.001230521158361661
+          ],
+          "mean": 0.00047644680708010175,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "R3": {
+      "constant_mdl_cost": 0.5,
+      "continuous_1d_search": true,
+      "grid_matches": 0,
+      "pass": true
+    },
+    "R4": {
+      "families": {
+        "circular": {
+          "B2_success_rate": 0.25,
+          "oracle_ge_.10_rate": 1.0,
+          "oracle_mean": 0.2713760085996785,
+          "oracle_min": 0.16051820178977863,
+          "pass": true
+        },
+        "rank": {
+          "B2_success_rate": 0.28125,
+          "oracle_ge_.10_rate": 1.0,
+          "oracle_mean": 0.3352886644040495,
+          "oracle_min": 0.11845258728800061,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "R5": {
+      "false_open_rate": 0.015,
+      "n": 200,
+      "opened": 3,
+      "pass": true
+    },
+    "R6": {
+      "challenge_p_max": 0.01,
+      "novelty_r2_max": 0.5,
+      "null_accept_rate": 0.0,
+      "pass": true,
+      "positive_same_world_challenge": {
+        "circular": {
+          "max_p": 0.001,
+          "pass": true,
+          "pass_rate": 1.0,
+          "required_rate": 0.95
+        },
+        "rank": {
+          "max_p": 0.001,
+          "pass": true,
+          "pass_rate": 1.0,
+          "required_rate": 0.95
+        }
+      },
+      "validation_gain_min": 0.05
+    },
+    "R7": {
+      "note": "Requires green executable CI: pooled ratio-of-sums + seed bootstrap; in-model block ablation without refit; world-trace similarity + predictive substitutability."
+    },
+    "R8": {
+      "note": "Requires green executable CI: B3 always searches and B2a/B2b share the same random grammar/bank with their specified selectors."
+    }
+  },
+  "instrument_valid": false,
+  "instrument_valid_numeric_R1_R6": true,
+  "iteration": 4,
+  "n_instrument": 32,
+  "n_noise": 200,
+  "workflow_run": 38261487624,
+  "ci_run": 38261487550,
+  "ci_conclusion": "success",
+  "step2_declared_valid": true,
+  "note": "The merger intentionally does not self-declare overall validity from JSON flags. Step 2 is declared valid only because numeric R1-R6 passed and the same-HEAD executable CI for R7/R8/protocol passed."
+}
