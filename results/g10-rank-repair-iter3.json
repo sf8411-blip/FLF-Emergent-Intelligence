@@ -1,0 +1,16 @@
+{
+  "best_depth_le3_affine_nrmse": 0.17689881593320134,
+  "depth_le3_equivalent_found": null,
+  "family": "rank",
+  "hidden_r2_in_l0": 0.5129458272830147,
+  "l0_nrmse": 0.6978926656134059,
+  "pass": false,
+  "reference_depth": 4,
+  "reference_nodes": 8,
+  "reference_nrmse": 4.643212332476989e-16,
+  "screened_candidates": 4441517,
+  "seed": 560011,
+  "unique_functions_by_depth": [2,29,1506],
+  "workflow_run": 38319802183,
+  "note": "Archived iteration-3 R-A failure. The only failed G10 condition is hidden R^2 in the L0 span = 0.51295 > fixed 0.50. No threshold was changed."
+}
