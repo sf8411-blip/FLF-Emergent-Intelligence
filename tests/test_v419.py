@@ -45,11 +45,12 @@ class TestV419(unittest.TestCase):
     def test_unhelpful_candidate_is_not_promoted(self):
         rng = np.random.default_rng(9)
         X = rng.uniform(-1, 1, size=(300, 1))
-        y = X[:, 0]
+        y = X[:, 0]  # The raw-feature baseline fits this target exactly.
         lang = initial_language(1)
         candidate = Expr("sin", (lang[0],))
         report = validate_candidate(X[:200], y[:200], X[200:], y[200:], lang, candidate)
         self.assertFalse(report.accepted)
+        self.assertEqual(report.reason, "baseline_already_exact")
         self.assertEqual(promote(lang, report), lang)
 
     def test_candidate_cannot_be_reintroduced(self):
