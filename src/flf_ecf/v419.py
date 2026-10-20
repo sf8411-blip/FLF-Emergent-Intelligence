@@ -121,7 +121,11 @@ def validate_candidate(X_train: np.ndarray, y_train: np.ndarray,
     baseline_pred = _fit_predict(X_train, y_train, X_valid, language)
     candidate_pred = _fit_predict(X_train, y_train, X_valid, language + (candidate,))
     base, score = rmse(y_valid, baseline_pred), rmse(y_valid, candidate_pred)
-    gain = (base - score) / max(base, 1e-15)
+    # Relative improvement is unstable when the baseline is already numerically exact.
+    # Do not promote a more complex operator for a meaningless floating-point gain.
+    if base <= 1e-12:
+        return PromotionReport(False, base, score, 0.0, None, "baseline_already_exact")
+    gain = (base - score) / base
     accepted = gain >= min_relative_gain
     return PromotionReport(accepted, base, score, gain,
                            candidate if accepted else None,
