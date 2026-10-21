@@ -33,7 +33,7 @@ class V429Tests(unittest.TestCase):
         y = X[:, 0] ** 2 + np.sin(X[:, 1])
         for i, strategy in enumerate(STRATEGIES):
             candidates = _candidate_order(strategy, np.random.default_rng(i), 7, X, y)
-            self.assertLessEqual(len(candidates), 7)
+            self.assertEqual(len(candidates), 7)
             self.assertEqual(len(set(candidates)), len(candidates))
 
 if __name__ == "__main__":
