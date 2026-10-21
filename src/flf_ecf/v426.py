@@ -254,13 +254,31 @@ def run_exchange_experiment(
         for r in all_outcomes if r.condition == "isolated"
     }
     gains = []
-    for condition in conditions[1:]:
+    confidence_intervals = []
+    for condition_index, condition in enumerate(conditions[1:]):
         rows = [r for r in all_outcomes if r.condition == condition]
-        gain = float(np.mean([
-            r.test_accuracy - isolated_by_key[(r.seed, r.cell_id)]
-            for r in rows
-        ]))
+        by_seed: dict[int, list[float]] = {}
+        for row in rows:
+            by_seed.setdefault(row.seed, []).append(
+                row.test_accuracy - isolated_by_key[(row.seed, row.cell_id)]
+            )
+        # Bootstrap independent seeds as clusters, not individual cells, because
+        # cells in a network are not statistically independent observations.
+        seed_gains = np.asarray(
+            [float(np.mean(by_seed[s])) for s in seed_values], dtype=float
+        )
+        gain = float(np.mean(seed_gains))
         gains.append((condition, gain))
+        if len(seed_gains) < 2:
+            confidence_intervals.append((condition, None, None))
+        else:
+            bootstrap_rng = np.random.default_rng(20261021 + condition_index)
+            sampled = bootstrap_rng.choice(
+                seed_gains, size=(4000, len(seed_gains)), replace=True
+            )
+            bootstrap_means = np.mean(sampled, axis=1)
+            low, high = np.quantile(bootstrap_means, [0.025, 0.975])
+            confidence_intervals.append((condition, float(low), float(high)))
 
     interpretation = (
         "Synthetic benchmark only: labels come from a hidden threshold oracle.",
