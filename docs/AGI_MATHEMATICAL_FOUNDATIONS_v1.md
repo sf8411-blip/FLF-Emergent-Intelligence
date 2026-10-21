@@ -21,9 +21,9 @@ This is a research program. None of the steps alone, nor their conjunction, curr
 
 Let time be discrete, (t \in \mathbb{N}). A cell (i) is a resource-bounded state machine
 
-[
+$
 C_i(t) = (s_i, M_i, G_i, B_i, \mathcal{O}_i, \mathcal{E}_i),
-]
+$
 
 where:
 
@@ -40,31 +40,31 @@ An environment is a process that yields an observation (o_t), accepts an optiona
 
 A cell transition is a partial function
 
-[
+$
 (s_i',M_i',G_i',\mathcal{O}_i',\mathcal{E}_i',B_i')
 = T_i(C_i,o_i,m_i),
-]
+$
 
 defined only when the operation is valid under the remaining resource budget. Each executed operation must have a measurable cost vector. If the budget is exhausted, the transition must stop or degrade safely.
 
 A message (m_{j\to i}) is an evidence-bearing record
-[
-m=(h, D, p, c, r, q),
-]
-where (h) is a structured hypothesis/operator description, (D) is its supporting and contradicting evidence, (p) is provenance, (c) is measured cost, (r) is the context/domain of applicability, and (q) is a calibrated confidence record. Receipt does not equal acceptance; sender reputation is not proof.
+$
+m=$h, D, p, c, r, q$,
+$
+where (h) is a structured hypothesis/operator description, (D) is its supporting and contradicting evidence, $p$ is provenance, (c) is measured cost, (r) is the context/domain of applicability, and (q) is a calibrated confidence record. Receipt does not equal acceptance; sender reputation is not proof.
 
 ## 3. Endogenous representation without assuming human mathematics
 
 A system cannot literally have no inductive bias: its sensors, memory, machine instructions, and update rules already constrain what it can discover. The achievable objective is narrower and testable: do not hard-code human arithmetic, symbolic labels, or a fixed scientific ontology as the privileged internal representation.
 
-Start with raw observations (X) and candidate operations that the current genome can execute. A representation is a finite structure (z = f_G(X)), built by applying available operators (G). Candidate structures are scored by a multi-objective criterion:
+Start with raw observations $X$ and candidate operations that the current genome can execute. A representation is a finite structure $z=f_G$X$$, built by applying available operators $G$. Candidate structures are scored by a multi-objective criterion:
 
-[
+$
 J(z)= L_{\mathrm{pred}}(X\mid z)
 + \lambda_c L_{\mathrm{complexity}}(z)
 + \lambda_r L_{\mathrm{resource}}(z)
 + \lambda_f L_{\mathrm{fragility}}(z).
-]
+$
 
 Here (L_{\mathrm{pred}}) measures held-out predictive or intervention error; (L_{\mathrm{complexity}}) measures description cost; (L_{\mathrm{resource}}) measures measured compute, memory, energy and communication cost; and (L_{\mathrm{fragility}}) measures degradation under perturbations and distribution shifts. The coefficients are design choices and must be disclosed. No single score should be treated as universal intelligence.
 
@@ -72,13 +72,13 @@ A structure is retained only if it beats a declared baseline on held-out cases a
 
 ## 4. Generalization objective
 
-Let \(\mathcal{T}\) be a distribution or evolving stream of tasks, including tasks not used for development. Let \(R(C,\tau)\) denote task risk for cell/network state (C) on task \(\tau\), and let (K(C,\tau)) be the measured cost of solving it. A useful research objective is
+Let \(\mathcal{T}\) be a distribution or evolving stream of tasks, including tasks not used for development. Let \(R(C,\tau)\) denote task risk for cell/network state $C$ on task \(\tau\), and let (K(C,\tau)) be the measured cost of solving it. A useful research objective is
 
-[
+$
 \min_{\Pi} \; \mathbb{E}_{\tau\sim\mathcal{T}}[R(\Pi,\tau)]
 + \alpha\,\mathbb{E}_{\tau\sim\mathcal{T}}[K(\Pi,\tau)]
 + \beta\,\mathcal{F}(\Pi),
-]
+$
 
 where \(\Pi\) is the network’s update and communication policy and \(\mathcal{F}\) penalizes brittleness, catastrophic forgetting, dependence on a single cell, and unsupported confidence. The task distribution and metrics must be declared. Performance on a single synthetic task is not evidence of general intelligence.
 
@@ -88,12 +88,12 @@ To test generality, evaluation must include held-out task families, compositiona
 
 Suppose cell (i) has candidate set (H_i), and a peer sends a candidate (h) with evidence. The receiver should compare the expected value of testing it with its opportunity cost:
 
-[
+$
 \operatorname{VOI}_i(h)
 = \mathbb{E}[U_i\mid \text{test }h]
 - U_i\text{ without test}
 - \operatorname{Cost}_i(h).
-]
+$
 
 Test (h) only when its estimated value of information is positive under a declared decision rule, or when a controlled exploration budget explicitly reserves resources for uncertain candidates. Positive and negative evidence must both be preserved; negative outcomes can prevent repeated waste. The value estimate itself is uncertain and should be calibrated on prior predictions.
 
@@ -136,13 +136,13 @@ Passing any finite sample of examples cannot, without additional assumptions on 
 
 ## 7. Energy, entropy, and survival
 
-“Entropy” must be operationally defined, not used as a metaphor. For a probability distribution (p) over a declared set of cell states, Shannon entropy is
+“Entropy” must be operationally defined, not used as a metaphor. For a probability distribution $p$ over a declared set of cell states, Shannon entropy is
 
-[
+$
 H(S)=-\sum_s p(s)\log p(s).
-]
+$
 
-For a message (M), information gain about a target variable (Y) can be estimated as mutual information (I(Y;M)=H(Y)-H(Y\mid M)), provided the sampling assumptions are met. Neither quantity automatically measures intelligence, truth, physical thermodynamic entropy, or usefulness.
+For a message $M$, information gain about a target variable $Y$ can be estimated as mutual information (I(Y;M)=H$Y$-H(Y\mid M)), provided the sampling assumptions are met. Neither quantity automatically measures intelligence, truth, physical thermodynamic entropy, or usefulness.
 
 For every transfer, measure at least bytes sent, CPU time, memory, energy if hardware telemetry is available, independent validation outcome, and downstream task benefit. Information should be transmitted or retained based on empirically calibrated value relative to cost. If actual energy telemetry is absent, report software proxies and do not label them joules.
 
