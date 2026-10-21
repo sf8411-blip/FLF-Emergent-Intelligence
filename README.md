@@ -22,6 +22,10 @@ A bounded prototype is on branch [`v4.19-builder-language-genesis`](https://gith
 
 See [`docs/v4.19_design.md`](docs/v4.19_design.md) for mechanism, limits, and acceptance gates.
 
+## Mathematical foundations for the long-term goal
+
+The formal research specification for a non-neural, resource-bounded digital-cell route toward general intelligence is in [docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md](docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md). It separates conditional mathematical propositions from experimental hypotheses and defines explicit research gates. It does **not** claim that AGI has been proved or achieved.
+
 ## Run regression tests
 ```bash
 python -m pip install -r requirements.txt
