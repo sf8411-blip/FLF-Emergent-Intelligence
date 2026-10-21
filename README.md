@@ -13,22 +13,22 @@ The v4.18.5 snapshot uses five independent main evolutionary runs and three matc
 ## Bounded interpretation
 Supported: in this synthetic family of continuous controlled worlds, an evolutionary population improved a supplied representation-builder genome over fixed and equal-budget random search under the documented benchmark.
 
-Not established: general intelligence, unrestricted self-modifying code, unrestricted builder-language invention, mathematics emerging without inductive bias, or transfer to natural physical systems.
+Not established: general intelligence, unrestricted self-modifying code, unrestricted builder-language invention, mathematics emerging without relevant inductive bias, or transfer to natural physical systems.
 
-## Next gate: v4.19 — Builder-Language Genesis
+## Research branch: v4.19 — Builder-Language Genesis
 v4.18 evolves builders **inside a supplied genome language**. v4.19 investigates whether persistent residual failures can motivate creation, validation, reuse, and transfer of a new builder operator.
 
-A bounded prototype is on branch [`v4.19-builder-language-genesis`](https://github.com/sf8411-blip/FLF-Emergent-Intelligence/tree/v4.19-builder-language-genesis). It proposes whitelisted expression-tree compositions and promotes them only when held-out RMSE improves by a configurable threshold. The primitive vocabulary remains human-designed; this is operator-composition search, not unrestricted code generation.
+The bounded prototype is on branch [`v4.19-builder-language-genesis`](https://github.com/sf8411-blip/FLF-Emergent-Intelligence/tree/v4.19-builder-language-genesis). It proposes whitelisted expression-tree compositions and promotes them only when held-out RMSE improves by a configurable threshold. The primitive vocabulary remains human-designed; this is operator-composition search, not unrestricted code generation.
 
-See [`docs/v4.19_design.md`](docs/v4.19_design.md) for mechanism, limits, and acceptance gates.
+## Mathematical foundations and formal core
 
-## Mathematical foundations for the long-term goal
-
-The formal research specification for a non-neural, resource-bounded digital-cell route toward general intelligence is in [docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md](docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md). It separates conditional mathematical propositions from experimental hypotheses and defines explicit research gates. It does **not** claim that AGI has been proved or achieved.
+- [Mathematical Foundations v1.0](docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md): definitions, conditional propositions, hypotheses, and research gates; not a proof that AGI will be achieved.
+- [v4.27 Typed Evidence Core](docs/v4.27_formal_evidence_core.md): immutable typed claims, provenance, receiver-side finite revalidation, and deterministic resource-budget invariants.
 
 ## Run regression tests
 ```bash
 python -m pip install -r requirements.txt
 python -m unittest discover -s tests -v
 ```
-The heavier v4.18 evolutionary benchmark is not run inside CI by default.
+
+The heavier v4.18 evolutionary benchmark is not run inside CI by default. v4.27's validation pass is a finite local test only; it does not establish a universal mathematical theorem.
