@@ -40,7 +40,9 @@ def main() -> int:
     print(f"Wrote {args.output}")
     for row in report.summaries:
         print(f"{row.scenario:>22} | {row.condition:>20} | "
-              f"test={row.mean_test_accuracy:.4f} | "
+              f"test_e2e={row.mean_test_accuracy:.4f} | "
+              f"coverage={row.selection_coverage:.3f} | "
+              f"test_if_selected={row.mean_test_accuracy_when_selected if row.mean_test_accuracy_when_selected is not None else float(0):.4f} | "
               f"validation={row.mean_validation_accuracy:.4f} | "
               f"error={row.mean_threshold_error:.4f} | "
               f"false_rejected={row.mean_rejected_false_candidates:.2f} | "
