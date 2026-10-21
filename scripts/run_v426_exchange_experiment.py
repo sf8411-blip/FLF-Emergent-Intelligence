@@ -7,9 +7,12 @@ from dataclasses import asdict
 import json
 import platform
 from pathlib import Path
+import sys
 
 import numpy as np
 
+# Support direct execution from a source checkout without requiring installation.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from flf_ecf.v426 import ExperimentConfig, run_exchange_experiment
 
 
