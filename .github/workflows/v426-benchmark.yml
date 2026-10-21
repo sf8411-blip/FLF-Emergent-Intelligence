@@ -1,0 +1,35 @@
+name: v4.26 controlled exchange experiment
+
+on:
+  push:
+    branches:
+      - v4.19-builder-language-genesis
+    paths:
+      - "src/flf_ecf/v426.py"
+      - "tests/test_v426.py"
+      - "scripts/run_v426_exchange_experiment.py"
+      - "docs/v4.26_controlled_exchange_benchmark.md"
+      - ".github/workflows/v426-benchmark.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - name: Run regression suite
+        run: python -m unittest discover -s tests -v
+      - name: Run paired benchmark
+        run: python scripts/run_v426_exchange_experiment.py --seeds 50 --output results/v4.26-exchange-benchmark.json
+      - name: Preserve raw results
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4.26-exchange-benchmark
+          path: results/v4.26-exchange-benchmark.json
+          if-no-files-found: error
+          retention-days: 90

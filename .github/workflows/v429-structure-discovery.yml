@@ -1,0 +1,36 @@
+name: v4.29 structure discovery comparison
+
+on:
+  push:
+    branches:
+      - v4.19-builder-language-genesis
+    paths:
+      - "src/flf_ecf/v419.py"
+      - "src/flf_ecf/v429.py"
+      - "tests/test_v429.py"
+      - "scripts/run_v429_structure_discovery.py"
+      - "docs/v4.29_structure_discovery_benchmark.md"
+      - ".github/workflows/v429-structure-discovery.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s tests -v
+      - name: Run multi-seed strategy comparison
+        run: python scripts/run_v429_structure_discovery.py --seeds 50 --output results/v4.29-structure-discovery.json
+      - name: Preserve raw results
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4.29-structure-discovery
+          path: results/v4.29-structure-discovery.json
+          if-no-files-found: error
+          retention-days: 90
