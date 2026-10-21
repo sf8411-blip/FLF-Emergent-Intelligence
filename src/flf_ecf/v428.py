@@ -93,6 +93,8 @@ class ArmSummary:
     scenario: str
     condition: str
     mean_test_accuracy: float
+    selection_coverage: float
+    mean_test_accuracy_when_selected: float | None
     mean_validation_accuracy: float
     mean_threshold_error: float
     mean_candidates_passed: float
@@ -306,6 +308,11 @@ def run_typed_exchange_experiment(
             summaries.append(ArmSummary(
                 scenario=scenario, condition=condition,
                 mean_test_accuracy=float(np.mean([r.test_accuracy for r in rows])),
+                selection_coverage=float(np.mean([r.selected_threshold is not None for r in rows])),
+                mean_test_accuracy_when_selected=(
+                    float(np.mean([r.test_accuracy for r in rows if r.selected_threshold is not None]))
+                    if any(r.selected_threshold is not None for r in rows) else None
+                ),
                 mean_validation_accuracy=float(np.mean([r.validation_accuracy for r in rows])),
                 mean_threshold_error=float(np.mean([r.threshold_error for r in rows])),
                 mean_candidates_passed=float(np.mean([r.candidates_passed for r in rows])),
