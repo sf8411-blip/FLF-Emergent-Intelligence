@@ -1,0 +1,37 @@
+name: v4.28 typed receiver-validation benchmark
+
+on:
+  push:
+    branches:
+      - v4.19-builder-language-genesis
+    paths:
+      - "src/flf_ecf/v427.py"
+      - "src/flf_ecf/v428.py"
+      - "tests/test_v427.py"
+      - "tests/test_v428.py"
+      - "scripts/run_v428_typed_exchange_experiment.py"
+      - "docs/v4.28_typed_exchange_benchmark.md"
+      - ".github/workflows/v428-typed-exchange.yml"
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s tests -v
+      - name: Run 50-seed typed exchange experiment
+        run: python scripts/run_v428_typed_exchange_experiment.py --seeds 50 --output results/v4.28-typed-exchange.json
+      - name: Preserve raw results
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4.28-typed-exchange
+          path: results/v4.28-typed-exchange.json
+          if-no-files-found: error
+          retention-days: 90
