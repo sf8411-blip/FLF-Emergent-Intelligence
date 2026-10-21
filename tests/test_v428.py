@@ -17,6 +17,13 @@ class V428Tests(unittest.TestCase):
         )
         self.assertEqual(len(report.summaries), 12)
         self.assertEqual(len(report.trials), 2 * 4 * 6 * 3)
+        for summary in report.summaries:
+            self.assertGreaterEqual(summary.selection_coverage, 0.0)
+            self.assertLessEqual(summary.selection_coverage, 1.0)
+            if summary.selection_coverage == 0.0:
+                self.assertIsNone(summary.mean_test_accuracy_when_selected)
+            else:
+                self.assertIsNotNone(summary.mean_test_accuracy_when_selected)
         self.assertEqual(
             {r.condition for r in report.summaries},
             {"isolated", "neighbor_exchange", "randomized_exchange"},
