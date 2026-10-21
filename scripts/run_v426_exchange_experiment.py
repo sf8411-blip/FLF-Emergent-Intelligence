@@ -50,8 +50,20 @@ def main() -> int:
             f"threshold_error={summary.mean_threshold_error:.4f}, "
             f"candidates={summary.mean_candidates_evaluated:.2f}"
         )
+    intervals = {
+        condition: (low, high)
+        for condition, low, high in report.paired_accuracy_gain_ci95
+    }
     for condition, gain in report.paired_accuracy_gain_vs_isolated:
-        print(f"paired accuracy gain vs isolated ({condition}): {gain:+.4f}")
+        low, high = intervals[condition]
+        if low is None or high is None:
+            ci_text = "95% CI unavailable (need at least 2 seeds)"
+        else:
+            ci_text = f"95% seed-bootstrap CI [{low:+.4f}, {high:+.4f}]"
+        print(
+            f"paired accuracy gain vs isolated ({condition}): "
+            f"{gain:+.4f}; {ci_text}"
+        )
     print("Interpretation:", " ".join(report.interpretation))
     return 0
 
