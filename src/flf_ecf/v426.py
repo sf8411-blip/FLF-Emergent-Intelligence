@@ -89,6 +89,7 @@ class ExperimentReport:
     summaries: tuple[ArmSummary, ...]
     outcomes: tuple[CellOutcome, ...]
     paired_accuracy_gain_vs_isolated: tuple[tuple[str, float], ...]
+    paired_accuracy_gain_ci95: tuple[tuple[str, float | None, float | None], ...]
     interpretation: tuple[str, ...]
 
 
@@ -293,5 +294,6 @@ def run_exchange_experiment(
         summaries=tuple(summaries),
         outcomes=tuple(all_outcomes),
         paired_accuracy_gain_vs_isolated=tuple(gains),
+        paired_accuracy_gain_ci95=tuple(confidence_intervals),
         interpretation=interpretation,
     )
