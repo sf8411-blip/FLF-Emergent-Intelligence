@@ -15,7 +15,12 @@ class V426Tests(unittest.TestCase):
             ["isolated", "neighbor_exchange", "randomized_exchange"],
         )
         self.assertEqual(len(report.outcomes), 2 * 6 * 3)
-        self.assertEqual(len(report.paired_accuracy_gain_vs_isolated), 2)\n        self.assertEqual(len(report.paired_accuracy_gain_ci95), 2)\n        for _, low, high in report.paired_accuracy_gain_ci95:\n            self.assertIsNotNone(low)\n            self.assertIsNotNone(high)\n            self.assertLessEqual(low, high)
+        self.assertEqual(len(report.paired_accuracy_gain_vs_isolated), 2)
+        self.assertEqual(len(report.paired_accuracy_gain_ci95), 2)
+        for _, low, high in report.paired_accuracy_gain_ci95:
+            self.assertIsNotNone(low)
+            self.assertIsNotNone(high)
+            self.assertLessEqual(low, high)
 
     def test_compute_budget_is_equal_across_arms(self):
         report = run_exchange_experiment(
