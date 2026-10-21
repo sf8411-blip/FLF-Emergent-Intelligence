@@ -176,6 +176,18 @@ def _candidate_order(strategy: Strategy, rng: np.random.Generator,
             keys.add(k)
         if len(unique) >= budget:
             break
+    # Keep the unique-proposal budget equal across strategies even when a
+    # simple-first ordering exhausts the shallow grammar. Fill only with safe,
+    # bounded compositions; strategy-specific ordering still determines priority.
+    attempts = 0
+    while len(unique) < budget and attempts < budget * 50:
+        attempts += 1
+        parent = unique[int(rng.integers(len(unique)))] if unique else pool[0]
+        candidate = _evolve_expr(parent, rng)
+        key = _expr_key(candidate)
+        if candidate.complexity <= 5 and key not in keys:
+            unique.append(candidate)
+            keys.add(key)
     return tuple(unique)
 
 
