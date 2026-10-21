@@ -24,6 +24,7 @@ The bounded prototype is on branch [`v4.19-builder-language-genesis`](https://gi
 
 - [Mathematical Foundations v1.0](docs/AGI_MATHEMATICAL_FOUNDATIONS_v1.md): definitions, conditional propositions, hypotheses, and research gates; not a proof that AGI will be achieved.
 - [v4.27 Typed Evidence Core](docs/v4.27_formal_evidence_core.md): immutable typed claims, provenance, receiver-side finite revalidation, and deterministic resource-budget invariants.
+- [v4.28 Typed Exchange Benchmark](docs/v4.28_typed_exchange_benchmark.md): 50-seed controlled comparison with false-claim, correlated-evidence, and distribution-shift scenarios; reports selection coverage separately from conditional accuracy.
 
 ## Run regression tests
 ```bash
