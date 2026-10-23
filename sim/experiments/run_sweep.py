@@ -51,6 +51,7 @@ def run_sweep(
             ).hexdigest()
             sim.run(duration)
             metrics = evaluate_online_baselines(sim.events)
+            agent_metrics = sim.agent.metrics()
             rows.append({
                 "omega": omega,
                 "replicate": replicate,
@@ -62,6 +63,8 @@ def run_sweep(
                 "cell_contacts": len(sim.events),
                 "time_mae": metrics["time_mae"],
                 "length_mae": metrics["length_mae"],
+                "online_cell_time_mae": agent_metrics["time_mae"],
+                "online_cell_length_mae": agent_metrics["length_mae"],
                 "time_forecasts": metrics["forecast_count_time"],
                 "length_forecasts": metrics["forecast_count_length"],
             })
@@ -70,6 +73,8 @@ def run_sweep(
         group = [row for row in rows if row["omega"] == omega]
         time_errors = [row["time_mae"] for row in group if row["time_mae"] is not None]
         length_errors = [row["length_mae"] for row in group if row["length_mae"] is not None]
+        online_time_errors = [row["online_cell_time_mae"] for row in group if row["online_cell_time_mae"] is not None]
+        online_length_errors = [row["online_cell_length_mae"] for row in group if row["online_cell_length_mae"] is not None]
         groups.append({
             "omega": omega,
             "runs": len(group),
@@ -77,6 +82,8 @@ def run_sweep(
             "sd_cell_contacts": pstdev(row["cell_contacts"] for row in group),
             "mean_time_mae": mean(time_errors) if time_errors else None,
             "mean_length_mae": mean(length_errors) if length_errors else None,
+            "mean_online_cell_time_mae": mean(online_time_errors) if online_time_errors else None,
+            "mean_online_cell_length_mae": mean(online_length_errors) if online_length_errors else None,
         })
     return {
         "duration_per_run": duration,
