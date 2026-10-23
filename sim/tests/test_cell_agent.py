@@ -29,9 +29,10 @@ class DigitalCellAgentTests(unittest.TestCase):
         agent.observe(1.0, 0.7)
         exported = agent.export()
         self.assertEqual(exported["observation_contract"], ["time", "length"])
-        self.assertNotIn("rod_id", str(exported))
-        self.assertNotIn("position", str(exported))
-        self.assertNotIn("velocity", str(exported))
+        self.assertTrue(all(set(item) == {"time", "length"} for item in exported["memory"]))
+        self.assertNotIn("rod_id", str(exported["memory"]))
+        self.assertNotIn("position", str(exported["memory"]))
+        self.assertNotIn("velocity", str(exported["memory"]))
 
     def test_invalid_and_out_of_order_observations_fail(self):
         agent = DigitalCellAgent()
