@@ -72,7 +72,9 @@ python -m digital_cell_sim.cli \
 ## خروجی‌ها
 
 - config.json: پارامترهای دقیق اجرا و seed.
+- initial_conditions.json: وضعیت کامل آغازین و seed مؤثر برای بازتولید اجرا.
 - snapshot.json: وضعیت نهایی مستطیل، سلول و تمام میله‌ها.
+- environment_snapshot.svg: تصویر برداری وضعیت نهایی محیط، بدون نیاز به کتابخانهٔ ترسیم اضافی.
 - collision_events.json: رویدادهای برخورد با سلول.
 - collision_events.csv: همان رویدادها در قالب CSV.
 - prediction_metrics.json: خطای پیش‌بینی‌های خط مبنا.
