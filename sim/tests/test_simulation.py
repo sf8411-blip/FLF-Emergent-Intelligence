@@ -1,5 +1,8 @@
+import json
 import math
+import tempfile
 import unittest
+from pathlib import Path
 
 from digital_cell_sim.learning import evaluate_online_baselines
 from digital_cell_sim.physics import (
@@ -113,6 +116,20 @@ class SimulationTests(unittest.TestCase):
         a, b = DigitalCellSimulation(), DigitalCellSimulation()
         self.assertNotEqual(a.effective_seed, b.effective_seed)
         self.assertNotEqual(a.snapshot()["rods"], b.snapshot()["rods"])
+
+    def test_outputs_include_reproducible_initial_state_and_svg(self):
+        sim = self.make_sim()
+        with tempfile.TemporaryDirectory() as directory:
+            sim.run(0.02)
+            sim.write_outputs(directory)
+            root = Path(directory)
+            self.assertTrue((root / "initial_conditions.json").is_file())
+            self.assertTrue((root / "environment_snapshot.svg").is_file())
+            config = json.loads((root / "config.json").read_text(encoding="utf-8"))
+            initial = json.loads((root / "initial_conditions.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["effective_seed"], sim.effective_seed)
+            self.assertEqual(initial["effective_seed"], sim.effective_seed)
+            self.assertIn("<svg", (root / "environment_snapshot.svg").read_text(encoding="utf-8"))
 
     def test_seed_reproduces_initial_conditions(self):
         a, b = self.make_sim(), self.make_sim()
