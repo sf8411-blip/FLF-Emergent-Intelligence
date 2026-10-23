@@ -156,6 +156,7 @@ class DigitalCellSimulation:
         self._build_walls()
         self._build_rods()
         self.space.on_collision(ROD, CELL, begin=self._on_cell_collision)
+        self.initial_snapshot = self.snapshot()
 
     def _build_cell(self) -> None:
         body = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -364,12 +365,51 @@ class DigitalCellSimulation:
             "event_count": len(self.events),
         }
 
+    def write_svg_snapshot(self, filename: str | Path) -> None:
+        """Write a dependency-free SVG rendering of the current world state."""
+        c = self.config
+        scale = 48.0
+        margin = 0.6
+        canvas_w = (c.width + 2 * margin) * scale
+        canvas_h = (c.height + 2 * margin) * scale
+
+        def xy(x: float, y: float) -> tuple[float, float]:
+            return ((x + c.width / 2 + margin) * scale,
+                    (c.height / 2 + margin - y) * scale)
+
+        angle = self.wall_body.angle
+        cosine, sine = math.cos(angle), math.sin(angle)
+        corners = [(-c.width/2, -c.height/2), (c.width/2, -c.height/2),
+                   (c.width/2, c.height/2), (-c.width/2, c.height/2)]
+        rotated = [(x*cosine-y*sine, x*sine+y*cosine) for x, y in corners]
+        wall_points = [xy(x, y) for x, y in rotated]
+        wall_points_text = " ".join(f"{x:.3f},{y:.3f}" for x, y in wall_points)
+        parts = [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_w:.0f}" height="{canvas_h:.0f}" viewBox="0 0 {canvas_w:.3f} {canvas_h:.3f}">',
+            '<rect width="100%" height="100%" fill="#ffffff"/>',
+            f'<polygon points="{wall_points_text}" fill="none" stroke="#333333" stroke-width="{2*c.wall_radius*scale:.3f}"/>',
+        ]
+        cell_x, cell_y = xy(0.0, 0.0)
+        parts.append(f'<circle cx="{cell_x:.3f}" cy="{cell_y:.3f}" r="{c.cell_radius*scale:.3f}" fill="#d8e8f5" stroke="#1f4e79" stroke-width="2"/>')
+        for body, record in self._meta_by_body.items():
+            a, b = _segment_endpoints(body.position.x, body.position.y, body.angle, record.length)
+            ax, ay = xy(*a)
+            bx, by = xy(*b)
+            parts.append(
+                f'<line x1="{ax:.3f}" y1="{ay:.3f}" x2="{bx:.3f}" y2="{by:.3f}" '
+                f'stroke="#b45309" stroke-width="{2*record.radius*scale:.3f}" stroke-linecap="round"/>'
+            )
+        parts.append(f'<text x="12" y="20" font-size="12" fill="#111111">t={self.time:.4f}s | rods={len(self.rods)} | seed={self.effective_seed}</text>')
+        parts.append('</svg>')
+        Path(filename).write_text("\n".join(parts), encoding="utf-8")
+
     def write_outputs(self, directory: str | Path) -> None:
         out = Path(directory)
         out.mkdir(parents=True, exist_ok=True)
         config_record = asdict(self.config)
         config_record["effective_seed"] = self.effective_seed
         (out / "config.json").write_text(json.dumps(config_record, indent=2), encoding="utf-8")
+        (out / "initial_conditions.json").write_text(json.dumps(self.initial_snapshot, indent=2), encoding="utf-8")
         (out / "snapshot.json").write_text(json.dumps(self.snapshot(), indent=2), encoding="utf-8")
         (out / "collision_events.json").write_text(
             json.dumps([asdict(e) for e in self.events], indent=2), encoding="utf-8"
@@ -379,3 +419,4 @@ class DigitalCellSimulation:
             writer = csv.DictWriter(f, fieldnames=["time", "event", "rod_id", "observed_length", "other"])
             writer.writeheader()
             writer.writerows(asdict(e) for e in self.events)
+        self.write_svg_snapshot(out / "environment_snapshot.svg")
