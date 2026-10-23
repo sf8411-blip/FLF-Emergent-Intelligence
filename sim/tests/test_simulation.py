@@ -34,6 +34,13 @@ class SimulationTests(unittest.TestCase):
             enforce_total_length_constraint=False,
         ))
 
+    def test_initial_geometry_has_no_penetrations(self):
+        sim = self.make_sim()
+        diagnostics = sim.geometry_diagnostics()
+        self.assertAlmostEqual(diagnostics["max_wall_violation"], 0.0, places=10)
+        self.assertAlmostEqual(diagnostics["max_cell_penetration"], 0.0, places=10)
+        self.assertAlmostEqual(diagnostics["max_rod_pair_penetration"], 0.0, places=10)
+
     def test_simulation_advances_and_state_stays_finite(self):
         sim = self.make_sim()
         sim.run(0.25)
