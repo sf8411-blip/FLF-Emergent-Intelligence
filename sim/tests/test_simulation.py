@@ -28,6 +28,7 @@ class SimulationTests(unittest.TestCase):
             rod_count=1, min_rod_length=0.8, max_rod_length=1.0,
             min_speed=0.1, max_speed=1.0, max_angular_speed=0.2,
             clockwise_omega=0.0, fixed_dt=1/240, max_substeps=256, seed=4,
+            enforce_total_length_constraint=False,
         ))
 
     def test_simulation_advances_and_state_stays_finite(self):
