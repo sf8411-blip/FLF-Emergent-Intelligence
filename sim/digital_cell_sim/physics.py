@@ -41,6 +41,7 @@ class SimulationConfig:
     max_substeps: int = 256
     seed: int = 17
     max_placement_attempts: int = 5000
+    enforce_total_length_constraint: bool = True
 
     def validate(self) -> None:
         positive = {
@@ -71,6 +72,13 @@ class SimulationConfig:
             raise ValueError("max_substeps must be >= 1")
         if self.max_placement_attempts < self.rod_count:
             raise ValueError("max_placement_attempts is too small")
+        if self.enforce_total_length_constraint:
+            target = (min(self.width, self.height) + max(self.width, self.height)) / 4.0 - self.cell_radius
+            if not self.rod_count * self.min_rod_length <= target <= self.rod_count * self.max_rod_length:
+                raise ValueError(
+                    "rod_count/min_rod_length/max_rod_length cannot satisfy the total-length constraint; "
+                    f"target total length is {target:.6g}"
+                )
 
 
 @dataclass
@@ -177,15 +185,46 @@ class DigitalCellSimulation:
         self.wall_body = body
         self.wall_shapes = shapes
 
+    def _sample_lengths(self) -> list[float]:
+        c = self.config
+        lengths = [self.rng.uniform(c.min_rod_length, c.max_rod_length) for _ in range(c.rod_count)]
+        if not c.enforce_total_length_constraint:
+            return lengths
+        target = (min(c.width, c.height) + max(c.width, c.height)) / 4.0 - c.cell_radius
+        # Project random lengths onto the bounded sum constraint by iteratively
+        # sharing the remaining difference among lengths with available capacity.
+        for _ in range(1000):
+            difference = target - sum(lengths)
+            if abs(difference) < 1e-10:
+                break
+            if difference > 0:
+                eligible = [i for i, value in enumerate(lengths) if value < c.max_rod_length - 1e-12]
+                if not eligible:
+                    break
+                share = difference / len(eligible)
+                for i in eligible:
+                    lengths[i] += min(share, c.max_rod_length - lengths[i])
+            else:
+                eligible = [i for i, value in enumerate(lengths) if value > c.min_rod_length + 1e-12]
+                if not eligible:
+                    break
+                share = (-difference) / len(eligible)
+                for i in eligible:
+                    lengths[i] -= min(share, lengths[i] - c.min_rod_length)
+        if abs(sum(lengths) - target) > 1e-7:
+            raise RuntimeError("Could not satisfy the configured total rod-length constraint")
+        return lengths
+
     def _build_rods(self) -> None:
         c = self.config
+        lengths = self._sample_lengths()
         minx, maxx = -c.width / 2 + c.max_rod_length / 2 + c.rod_radius, c.width / 2 - c.max_rod_length / 2 - c.rod_radius
         miny, maxy = -c.height / 2 + c.max_rod_length / 2 + c.rod_radius, c.height / 2 - c.max_rod_length / 2 - c.rod_radius
         placed: list[tuple[tuple[float, float], tuple[float, float], float]] = []
         for rod_id in range(c.rod_count):
             success = False
+            length = lengths[rod_id]
             for _ in range(c.max_placement_attempts):
-                length = self.rng.uniform(c.min_rod_length, c.max_rod_length)
                 angle = self.rng.uniform(-math.pi, math.pi)
                 x, y = self.rng.uniform(minx, maxx), self.rng.uniform(miny, maxy)
                 a, b = _segment_endpoints(x, y, angle, length)
