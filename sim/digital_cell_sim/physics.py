@@ -16,6 +16,8 @@ from typing import Any
 
 import pymunk
 
+from .cell import DigitalCellAgent
+
 
 ROD = 1
 CELL = 2
@@ -149,6 +151,7 @@ class DigitalCellSimulation:
         self.space.collision_bias = (1.0 - 0.1) ** 60
         self.time = 0.0
         self.events: list[CollisionEvent] = []
+        self.agent = DigitalCellAgent()
         self._last_cell_event_time: dict[int, float] = {}
         self.rods: list[RodRecord] = []
         self._meta_by_body: dict[Any, RodRecord] = {}
@@ -291,6 +294,9 @@ class DigitalCellSimulation:
             # A capsule consists of multiple shapes. Deduplicate simultaneous
             # shape-pair callbacks into one observable contact event per rod.
             if self.time - last_time > max(self.config.fixed_dt * 0.5, 1e-8):
+                # The agent receives only the sensor contract (time, length).
+                # The separate event log retains rod_id solely for simulator-side evaluation.
+                self.agent.observe(float(self.time), float(rod.length))
                 self.events.append(CollisionEvent(
                     time=float(self.time), event="cell_collision",
                     rod_id=rod.rod_id, observed_length=float(rod.length), other="cell",
@@ -411,6 +417,7 @@ class DigitalCellSimulation:
         (out / "config.json").write_text(json.dumps(config_record, indent=2), encoding="utf-8")
         (out / "initial_conditions.json").write_text(json.dumps(self.initial_snapshot, indent=2), encoding="utf-8")
         (out / "snapshot.json").write_text(json.dumps(self.snapshot(), indent=2), encoding="utf-8")
+        (out / "cell_memory.json").write_text(json.dumps(self.agent.export(), indent=2), encoding="utf-8")
         (out / "collision_events.json").write_text(
             json.dumps([asdict(e) for e in self.events], indent=2), encoding="utf-8"
         )
