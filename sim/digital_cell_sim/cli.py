@@ -46,10 +46,13 @@ def main() -> int:
         "effective_seed": sim.effective_seed,
         "outputs": str(args.output.resolve()),
         "prediction_metrics": {
-            "time_mae": metrics["time_mae"],
-            "length_mae": metrics["length_mae"],
-            "forecast_count_time": metrics["forecast_count_time"],
-            "forecast_count_length": metrics["forecast_count_length"],
+            "offline_baseline": {
+                "time_mae": metrics["time_mae"],
+                "length_mae": metrics["length_mae"],
+                "forecast_count_time": metrics["forecast_count_time"],
+                "forecast_count_length": metrics["forecast_count_length"],
+            },
+            "online_cell_agent": sim.agent.metrics(),
         },
         "validation_note": (
             "Numerical regression tests are separate from this run. Adaptive substepping "
