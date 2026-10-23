@@ -226,8 +226,9 @@ class DigitalCellSimulation:
     def _build_rods(self) -> None:
         c = self.config
         lengths = self._sample_lengths()
-        minx, maxx = -c.width / 2 + c.max_rod_length / 2 + c.rod_radius, c.width / 2 - c.max_rod_length / 2 - c.rod_radius
-        miny, maxy = -c.height / 2 + c.max_rod_length / 2 + c.rod_radius, c.height / 2 - c.max_rod_length / 2 - c.rod_radius
+        wall_clearance = c.rod_radius + c.wall_radius
+        minx, maxx = -c.width / 2 + c.max_rod_length / 2 + wall_clearance, c.width / 2 - c.max_rod_length / 2 - wall_clearance
+        miny, maxy = -c.height / 2 + c.max_rod_length / 2 + wall_clearance, c.height / 2 - c.max_rod_length / 2 - wall_clearance
         placed: list[tuple[tuple[float, float], tuple[float, float], float]] = []
         for rod_id in range(c.rod_count):
             success = False
@@ -237,9 +238,9 @@ class DigitalCellSimulation:
                 x, y = self.rng.uniform(minx, maxx), self.rng.uniform(miny, maxy)
                 a, b = _segment_endpoints(x, y, angle, length)
                 # Keep the entire capsule inside the unrotated initial rectangle.
-                if min(a[0], b[0]) < -c.width/2 + c.rod_radius or max(a[0], b[0]) > c.width/2 - c.rod_radius:
+                if min(a[0], b[0]) < -c.width/2 + wall_clearance or max(a[0], b[0]) > c.width/2 - wall_clearance:
                     continue
-                if min(a[1], b[1]) < -c.height/2 + c.rod_radius or max(a[1], b[1]) > c.height/2 - c.rod_radius:
+                if min(a[1], b[1]) < -c.height/2 + wall_clearance or max(a[1], b[1]) > c.height/2 - wall_clearance:
                     continue
                 if math.hypot(x, y) < c.cell_radius + c.rod_radius + length/2 + 0.08:
                     continue
