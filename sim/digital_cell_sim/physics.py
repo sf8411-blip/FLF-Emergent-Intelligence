@@ -370,12 +370,12 @@ class DigitalCellSimulation:
         c = self.config
         scale = 48.0
         margin = 0.6
-        canvas_w = (c.width + 2 * margin) * scale
-        canvas_h = (c.height + 2 * margin) * scale
+        # A rotated rectangle can have a bounding box larger than width/height.
+        canvas_w = (math.hypot(c.width, c.height) + 2 * margin) * scale
+        canvas_h = canvas_w
 
         def xy(x: float, y: float) -> tuple[float, float]:
-            return ((x + c.width / 2 + margin) * scale,
-                    (c.height / 2 + margin - y) * scale)
+            return (canvas_w / 2 + x * scale, canvas_h / 2 - y * scale)
 
         angle = self.wall_body.angle
         cosine, sine = math.cos(angle), math.sin(angle)
