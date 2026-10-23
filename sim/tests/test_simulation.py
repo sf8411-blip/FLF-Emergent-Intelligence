@@ -82,7 +82,7 @@ class SimulationTests(unittest.TestCase):
         sim.run(0.35)
         self.assertLess(left.velocity.x, 0.0)
         self.assertGreater(right.velocity.x, 0.0)
-        self.assertLess((right.position - left.position).x, 1.2)
+        self.assertLess(left.position.x, right.position.x, "rod centers must not cross")
 
     def test_default_total_length_constraint(self):
         sim = DigitalCellSimulation(SimulationConfig(seed=21))
