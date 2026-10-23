@@ -242,7 +242,9 @@ class DigitalCellSimulation:
                 body = pymunk.Body(mass, moment)
                 body.position = (x, y)
                 body.angle = angle
-                body.velocity = (self.rng.uniform(-c.max_speed, c.max_speed), self.rng.uniform(-c.max_speed, c.max_speed))
+                speed = self.rng.uniform(c.min_speed, c.max_speed)
+                velocity_angle = self.rng.uniform(-math.pi, math.pi)
+                body.velocity = (speed * math.cos(velocity_angle), speed * math.sin(velocity_angle))
                 body.angular_velocity = self.rng.uniform(-c.max_angular_speed, c.max_angular_speed)
                 shape = pymunk.Segment(body, (-length/2, 0), (length/2, 0), c.rod_radius)
                 shape.collision_type = ROD
