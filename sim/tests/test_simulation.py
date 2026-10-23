@@ -55,6 +55,15 @@ class SimulationTests(unittest.TestCase):
 
 
 
+
+    def test_finite_thickness_rod_uses_supported_contact_shapes(self):
+        sim = self.make_sim()
+        body = next(iter(sim._meta_by_body))
+        shapes = [shape for shape in sim.space.shapes if shape.body == body]
+        self.assertEqual(len(shapes), 3)
+        self.assertEqual(sum(isinstance(shape, __import__("pymunk").Poly) for shape in shapes), 1)
+        self.assertEqual(sum(isinstance(shape, __import__("pymunk").Circle) for shape in shapes), 2)
+
     def test_rod_bounces_from_fixed_wall(self):
         sim = self.make_sim()
         body = next(iter(sim._meta_by_body))
