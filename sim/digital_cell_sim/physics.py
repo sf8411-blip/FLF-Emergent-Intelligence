@@ -28,7 +28,7 @@ class SimulationConfig:
     cell_radius: float = 0.55
     rod_radius: float = 0.025
     wall_radius: float = 0.035
-    rod_count: int = 16
+    rod_count: int = 8
     min_rod_length: float = 0.35
     max_rod_length: float = 1.2
     min_speed: float = 0.35
