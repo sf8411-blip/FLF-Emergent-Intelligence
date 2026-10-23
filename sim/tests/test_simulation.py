@@ -100,6 +100,11 @@ class SimulationTests(unittest.TestCase):
         self.assertAlmostEqual(total, target, places=7)
         self.assertTrue(all(sim.config.min_rod_length <= rod.length <= sim.config.max_rod_length for rod in sim.rods))
 
+    def test_unseeded_runs_have_distinct_initial_conditions(self):
+        a, b = DigitalCellSimulation(), DigitalCellSimulation()
+        self.assertNotEqual(a.effective_seed, b.effective_seed)
+        self.assertNotEqual(a.snapshot()["rods"], b.snapshot()["rods"])
+
     def test_seed_reproduces_initial_conditions(self):
         a, b = self.make_sim(), self.make_sim()
         sa, sb = a.snapshot(), b.snapshot()
