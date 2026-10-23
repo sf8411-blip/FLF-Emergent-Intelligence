@@ -352,6 +352,49 @@ class DigitalCellSimulation:
                 progress_callback(self.time, len(self.events))
         return list(self.events)
 
+    def geometry_diagnostics(self) -> dict[str, float]:
+        """Measure current wall, cell and rod-pair penetration in world geometry."""
+        c = self.config
+        wall_angle = self.wall_body.angle
+        cosine, sine = math.cos(wall_angle), math.sin(wall_angle)
+        endpoints_by_body: dict[Any, tuple[tuple[float, float], tuple[float, float]]] = {}
+        max_wall_violation = 0.0
+        max_cell_penetration = 0.0
+
+        for body, record in self._meta_by_body.items():
+            a, b = _segment_endpoints(body.position.x, body.position.y, body.angle, record.length)
+            endpoints_by_body[body] = (a, b)
+            for x, y in (a, b):
+                # Transform the endpoint into the rotating rectangle's local frame.
+                lx, ly = x*cosine + y*sine, -x*sine + y*cosine
+                max_wall_violation = max(
+                    max_wall_violation,
+                    abs(lx) + record.radius - (c.width/2 - c.wall_radius),
+                    abs(ly) + record.radius - (c.height/2 - c.wall_radius),
+                )
+            centerline_distance = _point_segment_distance((0.0, 0.0), a, b)
+            max_cell_penetration = max(
+                max_cell_penetration,
+                c.cell_radius + record.radius - centerline_distance,
+            )
+
+        max_rod_pair_penetration = 0.0
+        bodies = list(self._meta_by_body.keys())
+        for i, body_a in enumerate(bodies):
+            a0, a1 = endpoints_by_body[body_a]
+            ra = self._meta_by_body[body_a].radius
+            for body_b in bodies[i + 1:]:
+                b0, b1 = endpoints_by_body[body_b]
+                rb = self._meta_by_body[body_b].radius
+                distance = _segments_distance(a0, a1, b0, b1)
+                max_rod_pair_penetration = max(max_rod_pair_penetration, ra + rb - distance)
+
+        return {
+            "max_wall_violation": max(0.0, float(max_wall_violation)),
+            "max_cell_penetration": max(0.0, float(max_cell_penetration)),
+            "max_rod_pair_penetration": max(0.0, float(max_rod_pair_penetration)),
+        }
+
     def snapshot(self) -> dict[str, Any]:
         c = self.config
         rods = []
@@ -370,6 +413,7 @@ class DigitalCellSimulation:
             "cell": {"x": 0.0, "y": 0.0, "radius": c.cell_radius},
             "rods": rods,
             "event_count": len(self.events),
+            "geometry_diagnostics": self.geometry_diagnostics(),
         }
 
     def write_svg_snapshot(self, filename: str | Path) -> None:
