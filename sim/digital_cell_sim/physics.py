@@ -209,7 +209,7 @@ class DigitalCellSimulation:
                 shape.collision_type = ROD
                 shape.elasticity = c.elasticity
                 shape.friction = c.friction
-                shape.filter = pymunk.ShapeFilter(categories=0b001, mask=0b110)
+                shape.filter = pymunk.ShapeFilter(categories=0b001, mask=0b111)
                 record = RodRecord(rod_id=rod_id, length=length, mass=mass, radius=c.rod_radius)
                 self.space.add(body, shape)
                 self.rods.append(record)
