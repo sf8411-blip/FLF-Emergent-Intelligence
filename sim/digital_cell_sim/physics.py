@@ -11,6 +11,7 @@ import json
 import math
 from pathlib import Path
 import random
+import secrets
 from typing import Any
 
 import pymunk
@@ -39,7 +40,7 @@ class SimulationConfig:
     friction: float = 0.0
     fixed_dt: float = 1.0 / 120.0
     max_substeps: int = 256
-    seed: int = 17
+    seed: int | None = None
     max_placement_attempts: int = 5000
     enforce_total_length_constraint: bool = True
 
@@ -138,7 +139,9 @@ class DigitalCellSimulation:
     def __init__(self, config: SimulationConfig | None = None):
         self.config = config or SimulationConfig()
         self.config.validate()
-        self.rng = random.Random(self.config.seed)
+        # Fresh high-entropy initial conditions by default; explicit seeds remain reproducible.
+        self.effective_seed = self.config.seed if self.config.seed is not None else secrets.randbits(128)
+        self.rng = random.Random(self.effective_seed)
         self.space = pymunk.Space(threaded=False)
         self.space.gravity = (0.0, 0.0)
         self.space.iterations = 30
@@ -354,6 +357,7 @@ class DigitalCellSimulation:
         return {
             "time": self.time,
             "config": asdict(c),
+            "effective_seed": self.effective_seed,
             "wall_angle": float(self.wall_body.angle),
             "cell": {"x": 0.0, "y": 0.0, "radius": c.cell_radius},
             "rods": rods,
@@ -363,7 +367,9 @@ class DigitalCellSimulation:
     def write_outputs(self, directory: str | Path) -> None:
         out = Path(directory)
         out.mkdir(parents=True, exist_ok=True)
-        (out / "config.json").write_text(json.dumps(asdict(self.config), indent=2), encoding="utf-8")
+        config_record = asdict(self.config)
+        config_record["effective_seed"] = self.effective_seed
+        (out / "config.json").write_text(json.dumps(config_record, indent=2), encoding="utf-8")
         (out / "snapshot.json").write_text(json.dumps(self.snapshot(), indent=2), encoding="utf-8")
         (out / "collision_events.json").write_text(
             json.dumps([asdict(e) for e in self.events], indent=2), encoding="utf-8"
