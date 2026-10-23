@@ -93,6 +93,15 @@ class SimulationTests(unittest.TestCase):
         self.assertGreater(right.velocity.x, 0.0)
         self.assertLess(left.position.x, right.position.x, "rod centers must not cross")
 
+    def test_variable_rod_counts_respect_total_length_constraint(self):
+        for count in (5, 8, 10, 12):
+            with self.subTest(rod_count=count):
+                sim = DigitalCellSimulation(SimulationConfig(seed=100 + count, rod_count=count))
+                total = sum(rod.length for rod in sim.rods)
+                target = (min(sim.config.width, sim.config.height) + max(sim.config.width, sim.config.height)) / 4 - sim.config.cell_radius
+                self.assertEqual(len(sim.rods), count)
+                self.assertAlmostEqual(total, target, places=7)
+
     def test_default_total_length_constraint(self):
         sim = DigitalCellSimulation(SimulationConfig(seed=21))
         total = sum(rod.length for rod in sim.rods)
