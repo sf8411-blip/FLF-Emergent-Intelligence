@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digital-cell-physics-sim"
+version = "0.1.0"
+description = "Rigid-body rotating-arena simulator and event-stream prediction baselines for a digital cell"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pymunk>=7.0,<8"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+digital-cell-sim = "digital_cell_sim.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["digital_cell_sim*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

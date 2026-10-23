@@ -1,0 +1,36 @@
+name: Digital cell simulation tests
+
+on:
+  push:
+    branches: [main, "feature/digital-cell-physics-sim-v1"]
+    paths:
+      - "sim/**"
+      - ".github/workflows/digital-cell-sim.yml"
+  pull_request:
+    paths:
+      - "sim/**"
+      - ".github/workflows/digital-cell-sim.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    defaults:
+      run:
+        working-directory: sim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: sim/pyproject.toml
+      - name: Install package and test dependencies
+        run: python -m pip install -e ".[test]"
+      - name: Run regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Smoke-test CLI
+        run: python -m digital_cell_sim.cli --duration 0.2 --output /tmp/digital-cell-smoke --seed 17
