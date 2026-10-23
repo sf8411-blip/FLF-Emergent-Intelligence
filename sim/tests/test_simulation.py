@@ -53,6 +53,14 @@ class SimulationTests(unittest.TestCase):
         self.assertEqual(sim.events[0].event, "cell_collision")
         self.assertAlmostEqual(sim.events[0].observed_length, record.length)
 
+
+    def test_default_total_length_constraint(self):
+        sim = DigitalCellSimulation(SimulationConfig(seed=21))
+        total = sum(rod.length for rod in sim.rods)
+        target = (min(sim.config.width, sim.config.height) + max(sim.config.width, sim.config.height)) / 4 - sim.config.cell_radius
+        self.assertAlmostEqual(total, target, places=7)
+        self.assertTrue(all(sim.config.min_rod_length <= rod.length <= sim.config.max_rod_length for rod in sim.rods))
+
     def test_seed_reproduces_initial_conditions(self):
         a, b = self.make_sim(), self.make_sim()
         sa, sb = a.snapshot(), b.snapshot()
