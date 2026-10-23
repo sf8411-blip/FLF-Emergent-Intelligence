@@ -44,6 +44,7 @@ def main() -> int:
         "clockwise_omega_rad_s": args.omega,
         "requested_seed": args.seed,
         "effective_seed": sim.effective_seed,
+        "geometry_diagnostics": sim.geometry_diagnostics(),
         "outputs": str(args.output.resolve()),
         "prediction_metrics": {
             "offline_baseline": {
