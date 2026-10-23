@@ -246,13 +246,25 @@ class DigitalCellSimulation:
                 velocity_angle = self.rng.uniform(-math.pi, math.pi)
                 body.velocity = (speed * math.cos(velocity_angle), speed * math.sin(velocity_angle))
                 body.angular_velocity = self.rng.uniform(-c.max_angular_speed, c.max_angular_speed)
-                shape = pymunk.Segment(body, (-length/2, 0), (length/2, 0), c.rod_radius)
-                shape.collision_type = ROD
-                shape.elasticity = c.elasticity
-                shape.friction = c.friction
-                shape.filter = pymunk.ShapeFilter(categories=0b001, mask=0b111)
+                # Chipmunk does not reliably provide segment-vs-segment contacts for
+                # all capsule configurations. Represent each finite-thickness rod as a
+                # rectangle plus two end caps so rod-rod contacts use supported shape pairs.
+                vertices = [
+                    (-length/2, -c.rod_radius), (length/2, -c.rod_radius),
+                    (length/2, c.rod_radius), (-length/2, c.rod_radius),
+                ]
+                shapes = [
+                    pymunk.Poly(body, vertices),
+                    pymunk.Circle(body, c.rod_radius, offset=(-length/2, 0)),
+                    pymunk.Circle(body, c.rod_radius, offset=(length/2, 0)),
+                ]
+                for shape in shapes:
+                    shape.collision_type = ROD
+                    shape.elasticity = c.elasticity
+                    shape.friction = c.friction
+                    shape.filter = pymunk.ShapeFilter(categories=0b001, mask=0b111)
                 record = RodRecord(rod_id=rod_id, length=length, mass=mass, radius=c.rod_radius)
-                self.space.add(body, shape)
+                self.space.add(body, *shapes)
                 self.rods.append(record)
                 self._meta_by_body[body] = record
                 placed.append((a, b, c.rod_radius))
