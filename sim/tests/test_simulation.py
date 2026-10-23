@@ -54,6 +54,36 @@ class SimulationTests(unittest.TestCase):
         self.assertAlmostEqual(sim.events[0].observed_length, record.length)
 
 
+
+    def test_rod_bounces_from_fixed_wall(self):
+        sim = self.make_sim()
+        body = next(iter(sim._meta_by_body))
+        body.position = (3.4, 0.0)
+        body.angle = 0.0
+        body.velocity = (1.0, 0.0)
+        body.angular_velocity = 0.0
+        sim.run(0.3)
+        self.assertLess(body.velocity.x, 0.0, "rod should reverse horizontal velocity after wall contact")
+
+    def test_two_rods_collide_without_passing_through(self):
+        sim = DigitalCellSimulation(SimulationConfig(
+            width=8, height=8, cell_radius=0.5, rod_radius=0.03, wall_radius=0.04,
+            rod_count=2, min_rod_length=0.8, max_rod_length=1.0,
+            min_speed=0.1, max_speed=1.0, max_angular_speed=0.2,
+            clockwise_omega=0.0, fixed_dt=1/240, max_substeps=256, seed=9,
+            enforce_total_length_constraint=False,
+        ))
+        bodies = list(sim._meta_by_body.keys())
+        left, right = bodies[0], bodies[1]
+        left.position, right.position = (-0.6, 1.5), (0.6, 1.5)
+        left.angle = right.angle = 0.0
+        left.velocity, right.velocity = (1.0, 0.0), (-1.0, 0.0)
+        left.angular_velocity = right.angular_velocity = 0.0
+        sim.run(0.35)
+        self.assertLess(left.velocity.x, 0.0)
+        self.assertGreater(right.velocity.x, 0.0)
+        self.assertLess((right.position - left.position).x, 1.2)
+
     def test_default_total_length_constraint(self):
         sim = DigitalCellSimulation(SimulationConfig(seed=21))
         total = sum(rod.length for rod in sim.rods)
