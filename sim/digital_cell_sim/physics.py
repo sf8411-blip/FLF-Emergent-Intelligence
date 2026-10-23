@@ -146,6 +146,7 @@ class DigitalCellSimulation:
         self.space.collision_bias = (1.0 - 0.1) ** 60
         self.time = 0.0
         self.events: list[CollisionEvent] = []
+        self._last_cell_event_time: dict[int, float] = {}
         self.rods: list[RodRecord] = []
         self._meta_by_body: dict[Any, RodRecord] = {}
         self._build_cell()
@@ -282,10 +283,15 @@ class DigitalCellSimulation:
                 rod = self._meta_by_body.get(shape.body)
                 break
         if rod is not None:
-            self.events.append(CollisionEvent(
-                time=float(self.time), event="cell_collision",
-                rod_id=rod.rod_id, observed_length=float(rod.length), other="cell",
-            ))
+            last_time = self._last_cell_event_time.get(rod.rod_id, -math.inf)
+            # A capsule consists of multiple shapes. Deduplicate simultaneous
+            # shape-pair callbacks into one observable contact event per rod.
+            if self.time - last_time > max(self.config.fixed_dt * 0.5, 1e-8):
+                self.events.append(CollisionEvent(
+                    time=float(self.time), event="cell_collision",
+                    rod_id=rod.rod_id, observed_length=float(rod.length), other="cell",
+                ))
+                self._last_cell_event_time[rod.rod_id] = float(self.time)
         return True
 
     def _max_contact_speed(self) -> float:
