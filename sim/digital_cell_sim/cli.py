@@ -12,7 +12,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run the digital-cell rotating rectangle simulation.")
     parser.add_argument("--duration", type=float, default=30.0, help="simulation duration in seconds")
     parser.add_argument("--output", type=Path, default=Path("runs/latest"), help="output directory")
-    parser.add_argument("--seed", type=int, default=17)
+    parser.add_argument("--seed", type=int, default=None, help="optional fixed seed; omit for fresh random initial conditions")
     parser.add_argument("--rods", type=int, default=8)
     parser.add_argument("--omega", type=float, default=0.25, help="clockwise angular speed in rad/s")
     parser.add_argument("--width", type=float, default=12.0)
@@ -42,7 +42,8 @@ def main() -> int:
         "rod_count": len(sim.rods),
         "cell_contact_count": len(sim.events),
         "clockwise_omega_rad_s": args.omega,
-        "seed": args.seed,
+        "requested_seed": args.seed,
+        "effective_seed": sim.effective_seed,
         "outputs": str(args.output.resolve()),
         "prediction_metrics": {
             "time_mae": metrics["time_mae"],
